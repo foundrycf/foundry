@@ -3,13 +3,12 @@
 * @hint A port of Node.js Path for Coldfusion
 * @author Joshua F. Rountree (http://www.joshuairl.com/)
 */
-import "cf_modules.*";
 component accessors=true {
 	property name="sep"
 	type="string";
 
 	public function init() {
-		variables._ = new underscoreCF.Underscore();
+		variables._ = new cf_modules.UnderscoreCF.Underscore();
 		
 		variables.jPath = createObject("java","org.apache.commons.io.FilenameUtils");
 		variables.jRegex = createObject("java","java.util.regex.Pattern");
@@ -451,36 +450,29 @@ component accessors=true {
 	}
 
 	public any function dirname(path) {
-	  var result = splitPath(path);
-	  var root = result[1];
-	  var dir = result[2];
-	 if (_.isEmpty(root) && _.isEmpty(dir)) {
-	    // No dirname whatsoever
-	    return '.';
-	  }
+		var result = splitPath(path);
+		var root = result[1];
+		var dir = result[2];
+		
+		if (_.isEmpty(root) && _.isEmpty(dir)) {
+			// No dirname whatsoever
+			return '.';
+		}
 
-	  if (!_.isEmpty(dir)) {
-	    // It has a dirname, strip trailing slash
-	    dir = left(dir,len(dir)-1);
-	  }
-	  return root & dir;
+		if (!_.isEmpty(dir)) {
+			// It has a dirname, strip trailing slash
+			dir = left(dir,len(dir)-1);
+		}
+		
+		return root & dir;
 	};
 
-
 	public any function basename(path, ext = "") {
-		var thebasename = arguments.path;
-		var theext = arguments.ext;
-		var f = "";
-		thebasename = ToString(jpath.getBasename(thebasename));
-		theext = ToString(jpath.getExtension(theext));
+		var f = splitPath(arguments.path)[3];
+		var theExt = arguments.ext;
 
-		if(_.isEmpty(theext)) {
-			theext = ToString(jpath.getExtension(arguments.path));
-		}
-		if(structKeyExists(arguments,'ext') AND len(trim(arguments.ext))) {
-			f = thebasename;
-		} else {
-			f = thebasename & "." & theext;
+		if(!_.isEmpty(theext) AND right(f,len(theExt)) EQ theExt) {
+			f = left(f,len(f) - len(theExt));
 		}
 
 		return f;

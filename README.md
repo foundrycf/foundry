@@ -1,4 +1,3 @@
-foundry
-=======
+#foundry
 
-A ColdFusion library that provides a set of tools to craft modular components.
+A ColdFusion library for building modular components.

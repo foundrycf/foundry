@@ -18,6 +18,7 @@ component name="Module" {
 		var metaData = getComponentMetaData(this);
 		var y = Path.splitPath(metaData.path)[2];
 		var fullPath = Path.resolve(y,x);
+		var module = noop();
 
 		// 1. If X is a core module,
 		//    a. return the core module
@@ -32,16 +33,19 @@ component name="Module" {
 			return createObject("component","lib.#cleanPath#");
 		} else if (isPath) {
 			if(isDir(fullPath)) {
-				
-				load_as_directory(fullPath);
+				module = load_as_directory(fullPath);
 			} else if (isFile(fullPath)) {
-				load_as_file(fullPath);
-			} else {
-				load_foundry_modules();
+				module = load_as_file(fullPath);
 			}
 		} else {
-
+				module = load_foundry_modules(x,Path.dirname(fullPath));
 		}
+
+		if(module NEQ noop()) {
+			throw "Foundry module not found.";
+		}
+
+		writeDump(var=module,abort=true);
 	}
 	private any function isCoreModule(x) {
 		if(listFindNoCase(this.core_modules,x)) return true;
@@ -70,7 +74,7 @@ component name="Module" {
 			var config = new lib.config(deserialize(fileRead(x & "/foundry.json")));
 			var m = x & config.main;
 
-			load_as_file(m);
+			return load_as_file(m);
 		} else if (isFile(x & "/index.cfc")) {
 			return createObject("component",x & "/index.cfc");
 		} else if (isFile(x & "/index.cfm")) {
@@ -84,9 +88,11 @@ component name="Module" {
 		// 2. for each DIR in DIRS:
 		// 	a. LOAD_AS_FILE(DIR/X)
 		// 	b. LOAD_AS_DIRECTORY(DIR/X)
-
+		var Path = new lib.Path();
+		var fullPath = "";
 		var dirs = foundry_modules_paths(start);
 		for (dir in dirs) {
+			fullPath = Path.join(dir & x);
 			if(isDir(fullPath)) {
 				load_as_directory(fullPath);
 			} else if (isFile(fullPath)) {
@@ -107,7 +113,21 @@ component name="Module" {
 		//    c. let I = I - 1
 		// 6. return DIRS
 
-		var parts = start.splitPath();
+		var Path = new lib.Path();
+		var parts = Path.splitPath(start);
+		var root = 0;
+		var dirs = [];
+		writeDump(var=start,abort=true);
+		i = 0;
+
+		while (i > root) {
+			if (parts[i] EQ "foundry_modules") continue;
+
+			dir = path.join(parts[3])
+		}
+
+		return dirs;
+		writeDump(var=parts,abort=true);
 	}
 
 	private void function cacheModule() {

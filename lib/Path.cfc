@@ -1,3 +1,4 @@
+import "modules.underscorecf.*";
 /**
 * @name Path.cfc
 * @hint A port of Node.js Path for Coldfusion
@@ -8,7 +9,7 @@ component accessors=true {
 	type="string";
 
 	public function init() {
-		variables._ = new cf_modules.UnderscoreCF.Underscore();
+		variables._ = new Underscore();
 		
 		variables.jPath = createObject("java","org.apache.commons.io.FilenameUtils");
 		variables.jRegex = createObject("java","java.util.regex.Pattern");

@@ -1,5 +1,5 @@
-component name="ArrayComponent" {
-	public ArrayComponent function init(Array ary = []) {
+component name="Array" {
+	public Array function init(Array ary = []) {
 		this['arr'] = arguments.ary;
 		this['utils'] = createObject("java","org.apache.commons.lang.ArrayUtils");
 

@@ -1,4 +1,4 @@
-component accessors=true {
+component name="RegExp" accessors=true {
 	property type="string" 
 	name="pattern"
 	getter=true

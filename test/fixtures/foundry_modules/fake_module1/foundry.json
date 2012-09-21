@@ -1,0 +1,11 @@
+//FOUNDRY PACKAGE MANAGER CONFIG
+{
+	"name": "fake_module1",
+	"description":"",
+	"version": "0.0.1",
+	"main":"./lib/main",
+	"author": "Joshua F. Rountree",
+	"dependencies":{
+		"UnderscoreCF":"~>0.0.0"
+	}
+}

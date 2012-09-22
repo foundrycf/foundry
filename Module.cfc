@@ -9,6 +9,7 @@ component name="Module" {
 	*/
 	public any function require(x){
 		var Path = new lib.Path();
+		variables.console = new lib.Console();
 		var cleanPath = Path.normalize(x);
 		var parts = Path.splitPath(x);
 		var _ = new lib.Underscore();
@@ -16,9 +17,11 @@ component name="Module" {
 		var pathSep = Path.getSep();
 		var isPath = (cleanPath CONTAINS pathSep);
 		var metaData = getComponentMetaData(this);
-		var y = Path.splitPath(metaData.path)[2];
+		var y = Path.basename(Path.splitPath(metaData.path)[3]);
 		var fullPath = Path.resolve(y,x);
 		var module = noop();
+
+		console.log("y: " & y);
 
 		// 1. If X is a core module,
 		//    a. return the core module
@@ -38,14 +41,13 @@ component name="Module" {
 				module = load_as_file(fullPath);
 			}
 		} else {
-				module = load_foundry_modules(x,Path.dirname(fullPath));
+				console.log(fullPath & " :: " & x);
+				module = load_foundry_modules(x,Path.dirname(y));
 		}
 
-		if(module NEQ noop()) {
+		if(module EQ noop()) {
 			throw "Foundry module not found.";
 		}
-
-		writeDump(var=module,abort=true);
 	}
 	private any function isCoreModule(x) {
 		if(listFindNoCase(this.core_modules,x)) return true;
@@ -53,6 +55,7 @@ component name="Module" {
 		return false;
 	}
 	private any function load_as_file(x) {
+		console.log("load as file: " & x);
 		if(isFile(x)) {
 			return createObject("component",x);
 		} else if (isFile(x & ".cfc")) {
@@ -63,6 +66,7 @@ component name="Module" {
 	}
 
 	private any function load_as_directory(x) {
+		console.log("load as directory: " & arguments.x);
 		// 1. If X/foundry.json is a file,
 		//    a. Parse X/foundry.json, and look for "main" field.
 		//    b. let M = X + (json main field)
@@ -84,6 +88,8 @@ component name="Module" {
 	}
 
 	private any function load_foundry_modules(x,start) {
+
+		console.log("load modules: " & arguments.x);
 		// 1. let DIRS=FOUNDRY_MODULES_PATHS(START)
 		// 2. for each DIR in DIRS:
 		// 	a. LOAD_AS_FILE(DIR/X)
@@ -92,10 +98,12 @@ component name="Module" {
 		var fullPath = "";
 		var dirs = foundry_modules_paths(start);
 		for (dir in dirs) {
-			fullPath = Path.join(dir & x);
-			if(isDir(fullPath)) {
+			fullPath = Path.join(dir,x);
+			if(isDir(path.resolve(expandPath("/"),fullPath))) {
+				console.log("isDir = " & fullPath);
 				load_as_directory(fullPath);
 			} else if (isFile(fullPath)) {
+				console.log("isFile = " & fullPath);
 				load_as_file(fullPath);
 			}
 		}
@@ -117,17 +125,21 @@ component name="Module" {
 		var parts = Path.splitPath(start);
 		var root = 0;
 		var dirs = [];
-		writeDump(var=start,abort=true);
-		i = 0;
+		i = arrayLen(parts)-1;
 
 		while (i > root) {
-			if (parts[i] EQ "foundry_modules") continue;
 
-			dir = path.join(parts[3])
+			if (parts[i] EQ "foundry_modules") continue;
+			dir = path.join(parts[i],"foundry_modules");
+			
+			dirs.add(dir);
+
+			i--;
+			
 		}
 
 		return dirs;
-		writeDump(var=parts,abort=true);
+		//writeDump(var=parts,abort=true);
 	}
 
 	private void function cacheModule() {

@@ -114,13 +114,19 @@ component name="config" {
 	**/
 	property name="engines";
 
-	public config any init(struct required params) {
-		structAppend(this,params,true); //setup values
+	public any function init(params) {
+		structAppend(this,params,true);
+		variables.Path = new Path();
+		this.validate();
 
 		return this;
 	}
 
-	public void any validate() {
+	public void function validate() {
 		var requiredProps = "name,version";
+
+		if(left(Path.basename(this.main),3) NEQ "cfc") {
+			this.main &= ".cfc";
+		}
 	}
 }

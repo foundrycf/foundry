@@ -4,9 +4,7 @@ component name="Module" {
 	application.foundry['cache'] = (structKeyExists(application.foundry,'cache'))? application.foundry.cache : {};
 	
 	this.core_modules = "path,regexp,console,struct,array";
-	/**
-	 * Creates a CFC instance based upon a relative, absolute or dot notation path.
-	*/
+	variables.Path = new lib.Path();
 	public any function require(x){
 		var Path = new lib.Path();
 		variables.console = new lib.Console();
@@ -17,12 +15,9 @@ component name="Module" {
 		var pathSep = Path.getSep();
 		var isPath = (cleanPath CONTAINS pathSep);
 		var metaData = getComponentMetaData(this);
-		var y = Path.basename(Path.splitPath(metaData.path)[3]);
-		var fullPath = Path.resolve(y,x);
+		var y = metaData.path;
+		var fullPath = Path.join(y,x);
 		var module = noop();
-
-		console.log("y: " & y);
-
 		// 1. If X is a core module,
 		//    a. return the core module
 		//    b. STOP
@@ -31,7 +26,6 @@ component name="Module" {
 		//    b. LOAD_AS_DIRECTORY(Y + X)
 		// 3. LOAD_FOUNDRY_MODULES(X, dirname(Y))
 		// 4. THROW "not found"
-
 		if(isCoreModule(cleanPath)) {
 			return createObject("component","lib.#cleanPath#");
 		} else if (isPath) {
@@ -41,10 +35,8 @@ component name="Module" {
 				module = load_as_file(fullPath);
 			}
 		} else {
-				console.log(fullPath & " :: " & x);
 				module = load_foundry_modules(x,Path.dirname(y));
 		}
-
 		if(module EQ noop()) {
 			throw "Foundry module not found.";
 		}
@@ -54,12 +46,13 @@ component name="Module" {
 
 		return false;
 	}
+
 	private any function load_as_file(x) {
 		console.log("load as file: " & x);
 		if(isFile(x)) {
-			return createObject("component",x);
+			return component(x);
 		} else if (isFile(x & ".cfc")) {
-			return createObject("component",x);
+			return component(x);
 		} else if (isFile(x & ".cfm")) {
 			return fileRead(x);
 		}
@@ -73,10 +66,13 @@ component name="Module" {
 		//    c. LOAD_AS_FILE(M)
 		// 2. If X/index.cfc is a file, load X/index.cfc as JavaScript text.  STOP
 		// 3. If X/index.cfm is a file, load X/index.cfm as binary addon.  STOP
+		var configFile = Path.join(x,"foundry.json");
+		
+		if(isFile(configFile)) {
+			var configContent = deserializeJson(fileRead(configFile));
 
-		if(isFile(x & "/foundry.json")) {
-			var config = new lib.config(deserialize(fileRead(x & "/foundry.json")));
-			var m = x & config.main;
+			var config = new lib.config(configContent);
+			var m = Path.resolve(Path.dirname(configFile), config.main);
 
 			return load_as_file(m);
 		} else if (isFile(x & "/index.cfc")) {
@@ -88,18 +84,17 @@ component name="Module" {
 	}
 
 	private any function load_foundry_modules(x,start) {
-
-		console.log("load modules: " & arguments.x);
+		console.log("load modules: " & arguments.x & " :: " & arguments.start);
 		// 1. let DIRS=FOUNDRY_MODULES_PATHS(START)
 		// 2. for each DIR in DIRS:
 		// 	a. LOAD_AS_FILE(DIR/X)
 		// 	b. LOAD_AS_DIRECTORY(DIR/X)
-		var Path = new lib.Path();
 		var fullPath = "";
 		var dirs = foundry_modules_paths(start);
 		for (dir in dirs) {
-			fullPath = Path.join(dir,x);
-			if(isDir(path.resolve(expandPath("/"),fullPath))) {
+			fullPath = Path.join(Path.dirname(start),dir,x);
+			console.log("FULL PATH: " & fullPath);
+			if(isDir(path.resolve(fullPath))) {
 				console.log("isDir = " & fullPath);
 				load_as_directory(fullPath);
 			} else if (isFile(fullPath)) {
@@ -120,26 +115,21 @@ component name="Module" {
 		//    b. DIRS = DIRS + DIR
 		//    c. let I = I - 1
 		// 6. return DIRS
-
-		var Path = new lib.Path();
 		var parts = Path.splitPath(start);
 		var root = 0;
 		var dirs = [];
 		i = arrayLen(parts)-1;
-
 		while (i > root) {
-
 			if (parts[i] EQ "foundry_modules") continue;
 			dir = path.join(parts[i],"foundry_modules");
-			
 			dirs.add(dir);
-
+			console.log("scanned: " & dir);
 			i--;
+
 			
 		}
 
 		return dirs;
-		//writeDump(var=parts,abort=true);
 	}
 
 	private void function cacheModule() {
@@ -147,19 +137,54 @@ component name="Module" {
 	}
 
 	private boolean function isFile(x) {
-		var fileInfo = getFileInfo(expandPath(x));
+		console.log("isFile: " & x);
+		
+		if(fileExists(x)) {
+			var fileInfo = getFileInfo(x);
 
-		if(fileInfo.type EQ "file") return true;
+			if(fileInfo.type EQ "file") return true;
+		}
 
 		return false;
 	}
 
 	private boolean function isDir(x) {
-		var fileInfo = getFileInfo(expandPath(x));
+		console.log("isDir: " & x);
+		if(directoryExists(x)) {
+			var fileInfo = getFileInfo(x);
 
-		if(fileInfo.type EQ "directory") return true;
-
+			if(fileInfo.type EQ "directory") return true;
+		}
 		return false;
+	}
+
+	function component(p){
+	    var sPath=Arguments.p;var oProxy="";var oFile="";var sType="";
+	    if( arrayLen(Arguments) gt 1 ) sType = lCase(Arguments[2]);
+
+	    // determine a default type    
+	    if( len(sType) eq 0 ){
+	        if( (sPath DOES NOT CONTAIN ".") OR ((sPath CONTAINS ".") AND (sPath DOES NOT CONTAIN "/") AND (sPath DOES NOT CONTAIN "\")) ) sType = "component";
+	        else sType = "relative";
+	    }
+	    
+	    // create the component
+	    switch( left(sType,1) ){
+	        case "c":
+	            return createObject("component", sPath);
+	        break;
+
+	        default:
+	            //if( left(sType, 1) neq "a" ) sPath = expandPath(sPath);
+	            sPath = replace(replace(sPath,expandPath("/"),""),"/",".");
+	            oProxy = createObject("java", "railo.runtime.PageContext");
+	            //writeDump(var=oProxy,abort=true);
+	            oFile = createObject("java", "java.io.File");
+	            oFile.init(sPath);
+	            writeDump(var=sPath,abort=true)
+	            return oProxy.loadComponent(Path.resolve(getPageContext(), oFile));
+	        break;
+	    }
 	}
 
 	public any function noop() {};

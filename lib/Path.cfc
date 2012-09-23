@@ -1,4 +1,3 @@
-import "modules.underscorecf.*";
 /**
 * @name Path.cfc
 * @hint A port of Node.js Path for Coldfusion

@@ -1,3 +1,7 @@
+/**
+* @name RegExp
+* @hint a class representing a regular expression
+**/
 component name="RegExp" accessors=true {
 	property type="string" 
 	name="pattern"

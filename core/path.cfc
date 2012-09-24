@@ -330,13 +330,11 @@ component accessors=true {
     		//remove first slash
     		var theFrom = mid(resolveFrom,2,len(resolveFrom));
 		    var theTo = mid(resolveTo,2,len(resolveTo));
-		    writeDump(var=theFrom,label="theFrom");
-		    writeDump(var=theTo,label="theTo");
+		    
 		    var fromParts = listToArray(theFrom,"/");
 		    var toParts = listToArray(theTo,"/");
 
-		    writeDump(var=fromParts,label="fromParts");
-		    writeDump(var=toParts,label="toParts");
+		   
 		    //run array trim
 		    // var fromParts = arrtrim(listToArray(from,'/'));
 		    // var toParts = arrtrim(listToArray(to,'/'));
@@ -351,8 +349,7 @@ component accessors=true {
 		        break;
 		      }
 		    }
-		    writeDump(var=samePartsLength,label="samePartsLength");
-		        
+		      
 		    var outputParts = [];
 		    for (var e = samePartsLength; e LT arrayLen(fromParts); e++) {
 		      outputParts.add('..');
@@ -404,13 +401,11 @@ component accessors=true {
 		var theArr = arguments.arr;
 		var start = 1;
 		for (; start LT arrayLen(theArr); start++) {
-			writeDump(var=theArr[start],label="Start");
 			if (!_.isEmpty(theArr[start])) break;
 		}
 
 		var end = arrayLen(theArr);
 		for (; end GTE 0; end--) {
-			writeDump(var=theArr[end],label="end");
 			if (!_.isEmpty(theArr[end])) break;
 		}
 

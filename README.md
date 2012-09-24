@@ -67,7 +67,7 @@ Many of it's principles are probably already used in your applications today so 
 
     Paste the following into it and change the values accordingly.
    
-    **Advanced `foundry.json` example**
+    **Basic `foundry.json` example**
     ``` JavaScript
     {
       "name": "my_app_module",
@@ -118,7 +118,7 @@ Many of it's principles are probably already used in your applications today so 
       "engines": {
         "adobe": ">=9.0.0" //specifies adobe version required
         "railo": ">=3.3.1" //specifies railo version requird
-        "foundy": "0.0.3" //even a place to specify the foundry version (good practice)
+        "foundry": "0.0.3" //even a place to specify the foundry version (good practice)
       } //A struct containing key/pair mappings of engine versions. This is used to specify the versions of CFML and Foundry your package is known to work correctly with.
     }
     ```

@@ -11,7 +11,7 @@ Up until now, there hasn't been a great way to adequately use CF to build, share
 That is why Foundry was created.
 
 ##What can it do for me?
-Whether you're building a large CMS application, or a smaller utility library, there comes a time when you need to use it in more applications.
+Whether you're building a large CMS application, or a smaller utility library, there comes a time when you need to use it in more applications.<br />
 You may also want to share it, and allow others to use it in their applications.
 
 Foundry builds upon common principles found in many other environments such as Ruby (and RubyGems), and Node (and npm).
@@ -140,7 +140,17 @@ Many of it's principles are probably already used in your applications today so 
 
 6. To download and install dependencies use `fpm.cfc`. (soon there will be a CLI for this, sorry!)
 
-    Install all defined dependencies in foundry.json
-    `http://localhost/foundry/fpm.cfc?method=install
-
+    Install all defined dependencies in foundry.json (in your project)
+    `http://my-project/foundry/fpm.cfc?method=install`
+    
+    Install a single module (in your project)
+    `http://my-project/foundry/fpm.cfc?method=install&id=UnderscoreCF`
+    
+    Install a single module globally (for all projects to use).
+    `http://my-project/foundry/fpm.cfc?method=install&id=UnderscoreCF&opts=g`
+    
+    Create a foundry symlink to a project folder globally (for all projects to use). 
+    This is handy for installing your own stuff, so that you can work on it and test it iteratively without having to continually rebuild.
+    `http://my-project/foundry/fpm.cfc?method=link`
+    
 ## Usage Examples

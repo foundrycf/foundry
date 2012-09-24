@@ -44,22 +44,26 @@ Many of it's principles are probably already used in your applications today so 
 
 1. [Download Foundry] (http://github.com/joshuairl/)
     or better yet, use Git
+
     ```
-    $> cd ~/my_projects_folder/
-    $> git clone https://github.com/joshuairl/foundry.git foundry
+    $ cd ~/my_projects_folder/
+    $ git clone https://github.com/joshuairl/foundry.git foundry
     ```
 2. Create a mapping in your context's admin panel.
-    Logical Path: /foundry
-    Physical Path: /Users/<user>/my_projects_folder/foundry
+
+    **Logical Path:** /foundry<br />
+    **Physical Path:** /Users/<user>/my_projects_folder/foundry<br />
     - Adobe - http://localhost/CFIDE/administrator
     - Railo - http://localhost:8888/railo-context/admin/web.cfm
 
 3. Create a new site / project folder or navigate to your existing one you would like to use Foundry on.
 
 4. Create a new file in your project's folder called `foundry.json`.
+
     Paste the following into it and change the values accordingly.
-*Advanced `foundry.json` example*
-  ``` JavaScript
+   
+    **Advanced `foundry.json` example**
+    ``` JavaScript
     {
       "name": "my_app_module",
     	"description":"",
@@ -69,56 +73,47 @@ Many of it's principles are probably already used in your applications today so 
     	"dependencies":{
     		"UnderscoreCF":"~>0.0.0"
     	}
-    }
-  ```
-
-*Advanced `foundry.json` example*
-``` JavaScript
-{
-  "name": "my_module", //The unique name of your project
-  "preferGlobal": "true", //Flag that indicates this package prefers to be installed globally for all your apps.
-  "version": "0.3.0", //Version of the package as specified by http://semver.org/.
-  "author": "Ricky Bobby <ricky@rickybobby.com>", //The author of the project.
-  "description": "a simple tool to help you do cool things.", //The description of the project.
-  
-  //An array of structures representing contributors to the project.
-  "contributors": [ 
+   }
+   ```
+    **Advanced `foundry.json` example**
+    ``` JavaScript
     {
-      "name": "John Smith",
-      "email": "john@smithcode.dom"
-    } 
-  ], 
-  "bin": {
-    "module-cli": "./bin/module" //A structure containing key/pair mappings of binary script names and cf script paths. 
-  },
-  "scripts": {}, //A structure containing key/pair mappings of foundry modules and cf script paths. (not currently used yet)
-  "main": "./lib/http-server", //The main entry point of the package. When calling require('module_name') in Foundry this is the file that will actually be required.
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/nodejitsu/http-server.git"
-  }, //A structure containing key/pair mappings of source code repositories. 
-  "keywords": [
-    "cli",
-    "http",
-    "server"
-  ], //An array of keywords which describe your package. Useful for people searching the fpmcf.org registry.
-  "dependencies" : {
-    "UnderscoreCF"   :  "*"
-  }, //A structure containing key/pair mappings of foundry packages and versions that this project depends on.
-
-  "license": "MIT", The license which you prefer to release your project under. MIT is a good choice.
-  "engines": {
-    "adobe": ">=9.0.0" //specifies adobe version required
-    "railo": ">=3.3.1" //specifies railo version requird
-    "foundy": "0.0.3" //even a place to specify the foundry version (good practice)
-  } //A struct containing key/pair mappings of engine versions. This is used to specify the versions of CFML and Foundry your package is known to work correctly with.
-}
-```
-
-
-The CommonJS API will fill that gap by defining APIs that handle many common application needs, ultimately providing a standard library as rich as those of Python, Ruby and Java. The intention is that an application developer will be able to write an application using the CommonJS APIs and then run that application across different JavaScript interpreters and host environments. With CommonJS-compliant systems, you can use JavaScript to write:
-
-    Server-side JavaScript applications
-    Command line tools
-    Desktop GUI-based applications
-    Hybrid applications (Titanium, Adobe AIR) 
+      "name": "my_module", //The unique name of your project
+      "preferGlobal": "true", //Flag that indicates this package prefers to be installed globally for all your apps.
+      "version": "0.3.0", //Version of the package as specified by http://semver.org/.
+      "author": "Ricky Bobby <ricky@rickybobby.com>", //The author of the project.
+      "description": "a simple tool to help you do cool things.", //The description of the project.
+      
+      //An array of structures representing contributors to the project.
+      "contributors": [ 
+        {
+          "name": "John Smith",
+          "email": "john@smithcode.dom"
+        } 
+      ], 
+      "bin": {
+        "module-cli": "./bin/module" //A structure containing key/pair mappings of binary script names and cf script paths. 
+      },
+      "scripts": {}, //A structure containing key/pair mappings of foundry modules and cf script paths. (not currently used yet)
+      "main": "./lib/http-server", //The main entry point of the package. When calling require('module_name') in Foundry this is the file that will actually be required.
+      "repository": {
+        "type": "git",
+        "url": "https://github.com/nodejitsu/http-server.git"
+      }, //A structure containing key/pair mappings of source code repositories. 
+      "keywords": [
+        "cli",
+        "http",
+        "server"
+      ], //An array of keywords which describe your package. Useful for people searching the fpmcf.org registry.
+      "dependencies" : {
+        "UnderscoreCF"   :  "*"
+      }, //A structure containing key/pair mappings of foundry packages and versions that this project depends on.
+    
+      "license": "MIT", The license which you prefer to release your project under. MIT is a good choice.
+      "engines": {
+        "adobe": ">=9.0.0" //specifies adobe version required
+        "railo": ">=3.3.1" //specifies railo version requird
+        "foundy": "0.0.3" //even a place to specify the foundry version (good practice)
+      } //A struct containing key/pair mappings of engine versions. This is used to specify the versions of CFML and Foundry your package is known to work correctly with.
+    }
+    ```

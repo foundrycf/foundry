@@ -138,19 +138,6 @@ Many of it's principles are probably already used in your applications today so 
     }
     ```
 
-6. To download and install dependencies use `fpm.cfc`. (soon there will be a CLI for this, sorry!)
-
-    Install all defined dependencies in foundry.json (in your project)<br />
-    `http://my-project/foundry/fpm.cfc?method=install`<br />
-    <br />
-    Install a single module (in your project)<br />
-    `http://my-project/foundry/fpm.cfc?method=install&id=UnderscoreCF`<br />
-    <br />
-    Install a single module globally (for all projects to use).<br />
-    `http://my-project/foundry/fpm.cfc?method=install&id=UnderscoreCF&opts=g`<br />
-    <br />
-    Create a foundry symlink to a project folder globally (for all projects to use). <br />
-    This is handy for installing your own stuff, so that you can work on it and test it iteratively without having to continually rebuild.<br />
-    `http://my-project/foundry/fpm.cfc?method=link`
+6. To download and install dependencies use [fpm](https://github.com/joshuairl/fpm) (proof-of-concept)
     
 ## Usage Examples

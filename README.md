@@ -6,8 +6,8 @@ Please be patient with Foundry, as pieces of this functionality is conceptual an
 
 ColdFusion (or CF) is a powerful server-side language wrapped around the JVM to build web applications.
 Like most languages, CF has an object-oriented aspect known as components (or CFC's) which provide a "class / method / inheritance" foundation for enhancing your applications.
-Up until now, there hasn't been a great way to adequately use CF to build, share, re-use and manage these Components.
 
+Up until now, there hasn't been a great way to adequately use CF to build, share, re-use and manage these Components.<br />
 That is why Foundry was created.
 
 ##What can it do for me?

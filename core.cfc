@@ -22,9 +22,9 @@ component {
 		var _ = new core.Underscore();
 		var isRelative = !Path.isAbsolute(x);
 		var pathSep = Path.getSep();
-		var isPath = (cleanPath CONTAINS pathSep);
+		var isPath = (x CONTAINS pathSep);
 		var y = getComponentMetaData(this).path;
-		var fullPath = Path.join(y,x);
+		var fullPath = Path.join(Path.dirname(y),x);
 		var module = {};
 		// 1. If X is a core module,
 		//    a. return the core module
@@ -34,26 +34,27 @@ component {
 		//    b. LOAD_AS_DIRECTORY(Y + X)
 		// 3. LOAD_FOUNDRY_MODULES(X, dirname(Y))
 		// 4. THROW "not found"
-		if(isCoreModule(cleanPath)) {
-			//console.log("Loading core module: " & cleanPath);
+		console.log(fullPath);
+		if(isCoreModule(x)) {
+			console.log("Loading core module: " & cleanPath);
 			return createObject("component","core.#cleanPath#");
 		} else if (isPath) {
-			//console.log("isPath(" & cleanPath & " CONTAINS " & pathSep & ") = " & isPath);
-			if(isDir(fullPath)) {
+			console.log("isPath(" & x & " CONTAINS " & pathSep & ") = " & isPath);
+			if(isDir(x)) {
 				//console.log("isDir(#fullPath#)");
 			
-				module = load_as_directory(fullPath);
-			} else if (isFile(fullPath)) {
+				module = load_as_directory(x);
+			} else if (isFile(x)) {
 				//console.log("isFile(#fullPath#)");
-				return load_as_file(fullPath);
+				return load_as_file(x);
 			}
 		} else {
-			//console.log("load_foundry_modules(#x#,#Path.dirname(y)#)");
+			console.log("load_foundry_modules(#x#,#Path.dirname(y)#)");
 			module = load_foundry_modules(x,Path.dirname(y));
 		}
 
 		if(NOT isDefined("module")) {
-			throw(errorCode="fdry001",type="foundry.no_module",message="Foundry module not found.");	
+			throw(errorCode="fdry001",type="foundry.no_module",message="Foundry module '#x#' not found.");	
 		}
 
 		return module;

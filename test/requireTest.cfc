@@ -3,8 +3,9 @@ component name="requireTest" extends="mxunit.framework.TestCase" {
 	import "fixtures.my_module";
 	public void function require_should_return_fake_module1() {
 		var my_module = new my_module();
-
 		my_module.requires_fake_module1();
+
+		writeDump(var=my_module,abort=true);
 	}
 
 	public void function stat_should_be_the_same_fileinfo_2() {
@@ -16,11 +17,13 @@ component name="requireTest" extends="mxunit.framework.TestCase" {
 	}
 
 	public void function setUp() {
-		
+		variables.console = new lib.console();
+		console.log("==============");
 	}
 
 	public void function tearDown() {
-
+		console.log("==============");
+		structDelete(variables,'console');
 	}
 
 	private any function fixture_path(path) {

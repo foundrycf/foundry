@@ -4,8 +4,8 @@ component name="my_module" extends="Foundry.Module" {
 	}
 
 	public any function requires_fake_module1() {
+		var Path = require("path");
 		var fake_module1 = require("fake_module1");
-		
 		return false;
 	}
 

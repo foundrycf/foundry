@@ -6,7 +6,7 @@
 * It contains the primary functions needed to include other 
 * Foundry modules into your applications.
 */
-component {
+component { 
 	//persist & cache
 	application['foundry'] = (structKeyExists(application,'foundry'))? application.foundry : {};
 	application.foundry['cache'] = (structKeyExists(application.foundry,'cache'))? application.foundry.cache : {};
@@ -35,20 +35,20 @@ component {
 		// 3. LOAD_FOUNDRY_MODULES(X, dirname(Y))
 		// 4. THROW "not found"
 		if(isCoreModule(cleanPath)) {
-			console.log("Loading core module: " & cleanPath);
+			//console.log("Loading core module: " & cleanPath);
 			return createObject("component","core.#cleanPath#");
 		} else if (isPath) {
-			console.log("isPath(" & cleanPath & " CONTAINS " & pathSep & ") = " & isPath);
+			//console.log("isPath(" & cleanPath & " CONTAINS " & pathSep & ") = " & isPath);
 			if(isDir(fullPath)) {
-				console.log("isDir(#fullPath#)");
+				//console.log("isDir(#fullPath#)");
 			
 				module = load_as_directory(fullPath);
 			} else if (isFile(fullPath)) {
-				console.log("isFile(#fullPath#)");
+				//console.log("isFile(#fullPath#)");
 				return load_as_file(fullPath);
 			}
 		} else {
-			console.log("load_foundry_modules(#x#,#Path.dirname(y)#)");
+			//console.log("load_foundry_modules(#x#,#Path.dirname(y)#)");
 			module = load_foundry_modules(x,Path.dirname(y));
 		}
 
@@ -56,8 +56,7 @@ component {
 			throw(errorCode="fdry001",type="foundry.no_module",message="Foundry module not found.");	
 		}
 
-		writeDump(var=module,abort=true);
-		
+		return module;
 	}
 	private any function isCoreModule(x) {
 		if(listFindNoCase(this.core_modules,x)) return true;

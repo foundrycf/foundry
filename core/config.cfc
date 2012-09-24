@@ -11,7 +11,7 @@ component name="config" {
 	* @name preferGlobal
 	* @type boolean
 	* @required false
-	* @hint Version of the package as specified by <a href="http://semver.org/">Semantic Versioning</a>.
+	* @hint Flag that indicates this package prefers to be installed globally for all your apps.
 	**/
 	property name="preferGlobal";
 
@@ -51,7 +51,7 @@ component name="config" {
 	* @name bin
 	* @type struct
 	* @required false
-	* @hint An structure containing key/pair mappings of binary script names and cf script paths. 
+	* @hint A structure containing key/pair mappings of binary script names and cf script paths. 
 	**/
 	property name="bin";
 
@@ -84,7 +84,7 @@ component name="config" {
 	* @name keywords
 	* @type array
 	* @required false
-	* @hint An array of keywords which describe your package. 
+	* @hint An array of keywords which describe your package. Useful for people searching the fpmcf.org registry.
 	**/
 	property name="keywords";
 

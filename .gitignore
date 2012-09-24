@@ -1,3 +1,7 @@
 /WEB-INF/
 
 .DS_Store
+
+core/foundry.sublime-project
+
+core/foundry.sublime-workspace

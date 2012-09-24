@@ -1,6 +1,8 @@
 #Foundry
-
 Foundry is a ColdFusion platform for building modular components for applications.
+
+##Preface
+Please be patient with Foundry, as pieces of this functionality is conceptual and is still being proven / developed.
 
 ColdFusion (or CF) is a powerful server-side language wrapped around the JVM to build web applications.
 Like most languages, CF has an object-oriented aspect known as components (or CFC's) which provide a "class / method / inheritance" foundation for enhancing your applications.
@@ -13,6 +15,7 @@ Whether you're building a large CMS application, or a smaller utility library, t
 You may also want to share it, and allow others to use it in their applications.
 
 Foundry builds upon common principles found in many other environments such as Ruby (and RubyGems), and Node (and npm).
+
 These principles include (not limited to):
 
 - Easily defining required dependencies at the top of Component files.
@@ -20,6 +23,8 @@ These principles include (not limited to):
 - Managing dependencies by being able to install / update them on the fly without visiting sites like Riaforge, Github, etc.
 - [Semantic Versioning](http://semver.org/) standards to keep track of versions of modules.
 - Set of core components that augment your module building experience.
+
+Now you can use CF to build more than just web apps.
 
 ##Getting Started
 You can jump in at any level with Foundry.
@@ -49,7 +54,7 @@ Many of it's principles are probably already used in your applications today so 
     $ cd ~/my_projects_folder/
     $ git clone https://github.com/joshuairl/foundry.git foundry
     ```
-2. Create a mapping in your context's admin panel.
+2. Create a mapping (and/or symlink/virtualweb in your project) to `/foundry`.
 
     **Logical Path:** /foundry<br />
     **Physical Path:** /Users/<user>/my_projects_folder/foundry<br />
@@ -98,7 +103,7 @@ Many of it's principles are probably already used in your applications today so 
       "main": "./lib/http-server", //The main entry point of the package. When calling require('module_name') in Foundry this is the file that will actually be required.
       "repository": {
         "type": "git",
-        "url": "https://github.com/nodejitsu/http-server.git"
+        "url": "https://github.com/joshuairl/my_project.git"
       }, //A structure containing key/pair mappings of source code repositories. 
       "keywords": [
         "cli",
@@ -117,3 +122,25 @@ Many of it's principles are probably already used in your applications today so 
       } //A struct containing key/pair mappings of engine versions. This is used to specify the versions of CFML and Foundry your package is known to work correctly with.
     }
     ```
+
+5. Extend your base components to allow for easy usage of external dependencies.
+    ```
+    component name="my_base" extends="foundry.module" {
+        public my_base function init() {
+            variables.path = require("path"); //require the foundry path module, apart of foundry's core.
+            variables._ = require("UnderscoreCF"); //require underscore, an external module by @russplaysguitar
+        }
+
+        public any function doSomething() {
+            myPath = path.resolve('foo/bar', '/tmp/file/', '..', 'a/../subfile');
+            myArray = _.forEach();
+        }
+    }
+    ```
+
+6. To download and install dependencies use `fpm.cfc`. (soon there will be a CLI for this, sorry!)
+
+    Install all defined dependencies in foundry.json
+    `http://localhost/foundry/fpm.cfc?method=install
+
+## Usage Examples

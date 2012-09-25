@@ -12,16 +12,16 @@ component name="RegExp" accessors=true {
 		this.setPattern(arguments.pattern);
 		this.insensitive = arguments.insensitive;
 		this.global = arguments.global;
-		variables.console = new cf_modules.Console.Console();
+		variables.console = new foundry.core.Console();
 	}
 
 	public any function test(str) {
 		var matches = [];
 
 		if(this.insensitive) {
-			matches = REMatchGroups(arguments.str,this.getPattern());
+			matches = this.match(arguments.str);
 		} else {
-			matches = REMatchGroups(arguments.str,this.getPattern());
+			matches = this.match(arguments.str);
 		}
 
 		if(arrayLen(matches) GT 0) {
@@ -47,10 +47,10 @@ component name="RegExp" accessors=true {
 	* REMatchGroups UDF
 	* @Author Ben Nadel <http://bennadel.com/>
 	*/
-	private array function REMatchGroups(text,pattern,scope = "all") {
+	public array function match(text,scope = "all") {
 		var local = structnew();
 		local.results = ArrayNew(1);
-		local.pattern =createobject( "java", "java.util.regex.Pattern" ).compile( javacast( "string", arguments.pattern ) );
+		local.pattern =createobject( "java", "java.util.regex.Pattern" ).compile( javacast( "string", this.getPattern()));
 		
 		local.matcher =local.pattern.matcher( javacast( "string", arguments.text ) );
 		
@@ -68,6 +68,10 @@ component name="RegExp" accessors=true {
 		}
 
 		return local.results;
+	}
+
+	public any function replace(text,replacement) {
+		return reReplace(text,this.getPattern(),replacement);
 	}
 
 }

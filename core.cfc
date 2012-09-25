@@ -6,20 +6,25 @@
 * It contains the primary functions needed to include other 
 * Foundry modules into your applications.
 */
-component { 
+component {
 	//persist & cache
 	application['foundry'] = (structKeyExists(application,'foundry'))? application.foundry : {};
 	application.foundry['cache'] = (structKeyExists(application.foundry,'cache'))? application.foundry.cache : {};
 	
-	this.core_modules = "path,regexp,console,struct,array";
+	this.core_modules = "path,regexp,console,struct,array,util";
 	variables.Path = new core.Path();
 	
+	//proxy function for init
+	public any function new() {
+		return this.init(argumentCollection=arguments);
+	}
+
 	public any function require(x){
 		var Path = new core.Path();
 		variables.console = new core.Console();
 		var cleanPath = Path.normalize(x);
 		var parts = Path.splitPath(x);
-		var _ = new core.Underscore();
+		var _ = new core.util();
 		var isRelative = !Path.isAbsolute(x);
 		var pathSep = Path.getSep();
 		var isPath = (x CONTAINS pathSep);

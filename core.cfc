@@ -11,7 +11,7 @@ component {
 	application['foundry'] = (structKeyExists(application,'foundry'))? application.foundry : {};
 	application.foundry['cache'] = (structKeyExists(application.foundry,'cache'))? application.foundry.cache : {};
 	
-	this.core_modules = "path,regexp,console,struct,array,util";
+	variables.core_modules = "path,regexp,console,struct,array,util";
 	variables.Path = new core.Path();
 	
 	//proxy function for init
@@ -65,7 +65,7 @@ component {
 		return module;
 	}
 	private any function isCoreModule(x) {
-		if(listFindNoCase(this.core_modules,x)) return true;
+		if(listFindNoCase(core_modules,x)) return true;
 
 		return false;
 	}

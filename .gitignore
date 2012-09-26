@@ -2,6 +2,5 @@
 
 .DS_Store
 
-core/foundry.sublime-project
-
-core/foundry.sublime-workspace
+*.sublime-project
+*.sublime-workspace

@@ -1,7 +1,7 @@
 component name="ArrayObj" {
 	public ArrayObj function init(Array ary = []) {
 		this['arr'] = arguments.ary;
-		this['utils'] = createObject("java","org.apache.commons.lang.ArrayUtils");
+		//this['utils'] = createObject("java","org.apache.commons.lang.ArrayUtils");
 
 		return this;
 	}

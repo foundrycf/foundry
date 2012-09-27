@@ -1,305 +1,305 @@
 component name="eventsTests" extends="mxunit.framework.TestCase" {
-  public void function should_add_listeners() {
-    var e = new core.emitter();
-    var events_new_listener_emited = [];
-    var listeners_new_listener_emited = [];
-    var times_hello_emited = 0;
+  // public void function should_add_listeners() {
+  //   var e = new core.emitter();
+  //   var events_new_listener_emited = [];
+  //   var listeners_new_listener_emited = [];
+  //   var times_hello_emited = 0;
 
-    e.on('newListener', function(event, listener) {
-      console.log("newListener");
-      events_new_listener_emited.add(event);
-      listeners_new_listener_emited.add(listener);
-    });
+  //   e.on('newListener', function(event, listener) {
+  //     console.log("newListener");
+  //     events_new_listener_emited.add(event);
+  //     listeners_new_listener_emited.add(listener);
+  //   });
 
-    var hello = function(a, b) {
-      console.log('hello called');
-      times_hello_emited++;
-      assertEquals('a', a);
-      assertEquals('b', b);
-    }
+  //   var hello = function(a, b) {
+  //     console.log('hello called');
+  //     times_hello_emited++;
+  //     assertEquals('a', a);
+  //     assertEquals('b', b);
+  //   }
 
-    e.on('hello', hello);
+  //   e.on('hello', hello);
 
-    var foo = function() {};
-    e.once('foo', foo);
+  //   var foo = function() {};
+  //   e.once('foo', foo);
 
-    console.log('start');
+  //   console.log('start');
 
-    e.emit('hello', 'a', 'b');
+  //   e.emit('hello', 'a', 'b');
         
-    // just make sure that this doesn't throw:
-    var f = new core.emitter();
-    f.setMaxListeners(0);
+  //   // just make sure that this doesn't throw:
+  //   var f = new core.emitter();
+  //   f.setMaxListeners(0);
 
-    assertEquals(['hello', 'foo'], events_new_listener_emited);
-    assertEquals([hello, foo], listeners_new_listener_emited);
-    assertEquals(1, times_hello_emited);
-  }
+  //   assertEquals(['hello', 'foo'], events_new_listener_emited);
+  //   assertEquals([hello, foo], listeners_new_listener_emited);
+  //   assertEquals(1, times_hello_emited);
+  // }
 
-  public void function should_check_listener_leaks() {
-    var e = new core.emitter();
+  // public void function should_check_listener_leaks() {
+  //   var e = new core.emitter();
       
-    // default
-    for (var i = 0; i < 10; i++) {
-      console.log(i);
-      e.on('default', function() {});
-    }
-    assertTrue(!e._events['default'].warned,"e._events['default'].warned = " & e._events['default'].warned);
+  //   // default
+  //   for (var i = 0; i < 10; i++) {
+  //     console.log(i);
+  //     e.on('default', function() {});
+  //   }
+  //   assertTrue(!e._events['default'].warned,"e._events['default'].warned = " & e._events['default'].warned);
 
-    e.on('default', function() {});
-    assertTrue(e._events['default'].warned,"e._events['default'].warned = " & e._events['default'].warned);
+  //   e.on('default', function() {});
+  //   assertTrue(e._events['default'].warned,"e._events['default'].warned = " & e._events['default'].warned);
 
-    // specific
-    e.setMaxListeners(5);
-    for (var i = 0; i < 5; i++) {
-      console.log(i);
-      e.on('specific', function() {});
-    }
+  //   // specific
+  //   e.setMaxListeners(5);
+  //   for (var i = 0; i < 5; i++) {
+  //     console.log(i);
+  //     e.on('specific', function() {});
+  //   }
 
-    assertTrue(!e._events['specific'].warned,"e._events['specific'].warned = " & e._events['specific'].warned);
-    e.on('specific', function() {});
+  //   assertTrue(!e._events['specific'].warned,"e._events['specific'].warned = " & e._events['specific'].warned);
+  //   e.on('specific', function() {});
 
-    assertTrue(e._events['specific'].warned,"e._events['specific'].warned = " & e._events['specific'].warned);
+  //   assertTrue(e._events['specific'].warned,"e._events['specific'].warned = " & e._events['specific'].warned);
     
-    // only one
-    var i = 0;
-    e.setMaxListeners(1);
-    e.on('only one', function() {});
-    console.log(i++);
-    assertTrue(!e._events['only one'].warned,"e._events['only one'].warned = " & e._events['only one'].warned);
-    e.on('only one', function() {});
-    assertTrue(e._events['only one'].warned,"e._events['only one'].warned = " & e._events['only one'].warned);
+  //   // only one
+  //   var i = 0;
+  //   e.setMaxListeners(1);
+  //   e.on('only one', function() {});
+  //   console.log(i++);
+  //   assertTrue(!e._events['only one'].warned,"e._events['only one'].warned = " & e._events['only one'].warned);
+  //   e.on('only one', function() {});
+  //   assertTrue(e._events['only one'].warned,"e._events['only one'].warned = " & e._events['only one'].warned);
 
-    // unlimited
-    e.setMaxListeners(0);
-    for (var i = 0; i <= 1000; i++) {
-      console.log(i);
-      e.on('unlimited', function() {});
-    }
-    assertTrue(!e._events['unlimited'].warned);
-    }
+  //   // unlimited
+  //   e.setMaxListeners(0);
+  //   for (var i = 0; i <= 1000; i++) {
+  //     console.log(i);
+  //     e.on('unlimited', function() {});
+  //   }
+  //   assertTrue(!e._events['unlimited'].warned);
+  //   }
     
 
-  public void function e1_listener_should_work() {
-    var listener = function() {}
-    var listener2 = function() {}
+  // public void function e1_listener_should_work() {
+  //   var listener = function() {}
+  //   var listener2 = function() {}
 
-    var e1 = new core.emitter();
+  //   var e1 = new core.emitter();
     
-    e1.on('foo', listener);
-    var fooListeners = e1.listeners('foo');
-    assertEquals(e1.listeners('foo'), [listener]);
+  //   e1.on('foo', listener);
+  //   var fooListeners = e1.listeners('foo');
+  //   assertEquals(e1.listeners('foo'), [listener]);
 
-    e1.removeAllListeners('foo');
+  //   e1.removeAllListeners('foo');
 
-    assertEquals(e1.listeners('foo'), []);
-    assertEquals(fooListeners, [listener]);
-  }
-
-
-  public void function e2_listener_should_work() {
-    var listener = function() {}
-    var listener2 = function() {}
-    var e2 = new core.emitter();
-    e2.on('foo', listener);
-    var e2ListenersCopy = duplicate(e2.listeners('foo'));
-    assertEquals(e2ListenersCopy, [listener]);
-    assertEquals(e2.listeners('foo'), [listener]);
-    e2ListenersCopy.add(listener2);
-    assertEquals(e2.listeners('foo'), [listener]);
-    assertEquals(e2ListenersCopy, [listener, listener2]);
-  }
+  //   assertEquals(e1.listeners('foo'), []);
+  //   assertEquals(fooListeners, [listener]);
+  // }
 
 
-  public void function e3_listener_should_work() {
-    var listener = function() {}
-    var listener2 = function() {}
-    var e3 = new core.emitter();
-    e3.on('foo', listener);
-    var e3ListenersCopy = duplicate(e3.listeners('foo'));
-    e3.on('foo', listener2);
-    assertEquals(e3.listeners('foo'), [listener, listener2]);
-    assertEquals(e3ListenersCopy, [listener]);
-  }
+  // public void function e2_listener_should_work() {
+  //   var listener = function() {}
+  //   var listener2 = function() {}
+  //   var e2 = new core.emitter();
+  //   e2.on('foo', listener);
+  //   var e2ListenersCopy = duplicate(e2.listeners('foo'));
+  //   assertEquals(e2ListenersCopy, [listener]);
+  //   assertEquals(e2.listeners('foo'), [listener]);
+  //   e2ListenersCopy.add(listener2);
+  //   assertEquals(e2.listeners('foo'), [listener]);
+  //   assertEquals(e2ListenersCopy, [listener, listener2]);
+  // }
 
-  public void function gotevent_should_be_true() {
-    var process = new core.emitter();
+
+  // public void function e3_listener_should_work() {
+  //   var listener = function() {}
+  //   var listener2 = function() {}
+  //   var e3 = new core.emitter();
+  //   e3.on('foo', listener);
+  //   var e3ListenersCopy = duplicate(e3.listeners('foo'));
+  //   e3.on('foo', listener2);
+  //   assertEquals(e3.listeners('foo'), [listener, listener2]);
+  //   assertEquals(e3ListenersCopy, [listener]);
+  // }
+
+  // public void function gotevent_should_be_true() {
+  //   var process = new core.emitter();
     
-    process.on("exit",function(){
-      console.log("exited");
-    });
-    var gotEvent = false;
-    var e = new core.emitter();
+  //   process.on("exit",function(){
+  //     console.log("exited");
+  //   });
+  //   var gotEvent = false;
+  //   var e = new core.emitter();
     
-    process.on("exit",function() {
-      if(not gotEvent) {
-        fail("failed");
-      }
-    });
+  //   process.on("exit",function() {
+  //     if(not gotEvent) {
+  //       fail("failed");
+  //     }
+  //   });
 
-    e.on('maxListeners', function() {
-      gotEvent = true;
-    });
+  //   e.on('maxListeners', function() {
+  //     gotEvent = true;
+  //   });
 
-    // Should not corrupt the 'maxListeners' queue.
-    e.setMaxListeners(42);
+  //   // Should not corrupt the 'maxListeners' queue.
+  //   e.setMaxListeners(42);
 
-    e.emit('maxListeners');
+  //   e.emit('maxListeners');
 
-    process.emit("exit");
-  }
+  //   process.emit("exit");
+  // }
 
-  public void function should_not_have_sideeffects() {
-    var e = new core.emitter();
-    var fl = [];  // foo listeners
+  // public void function should_not_have_sideeffects() {
+  //   var e = new core.emitter();
+  //   var fl = [];  // foo listeners
 
-    fl = e.listeners('foo');
-    assertTrue(isArray(fl));
-    assertTrue(arrayLen(fl) EQ 0);
-    assertTrue(!structKeyExists(e,'_events'));
+  //   fl = e.listeners('foo');
+  //   assertTrue(isArray(fl));
+  //   assertTrue(arrayLen(fl) EQ 0);
+  //   assertTrue(!structKeyExists(e,'_events'));
 
-    e.on('foo', fail);
+  //   e.on('foo', fail);
     
-    fl = e.listeners('foo');
-    assert(structCompare(getMetaData(e._events.foo.arr[1]),getMetaData(fail)));
-    assert(isArray(fl));
-    assert(arrayLen(fl) EQ 1);
-    assert(structCompare(getMetaData(fl[1]),getMetaData(fail)));
+  //   fl = e.listeners('foo');
+  //   assert(structCompare(getMetaData(e._events.foo.arr[1]),getMetaData(fail)));
+  //   assert(isArray(fl));
+  //   assert(arrayLen(fl) EQ 1);
+  //   assert(structCompare(getMetaData(fl[1]),getMetaData(fail)));
 
-    e.listeners('bar');
-    assert(!structKeyExists(e._events,'bar'));
+  //   e.listeners('bar');
+  //   assert(!structKeyExists(e._events,'bar'));
 
-    e.on('foo', assert);
+  //   e.on('foo', assert);
     
-    fl = e.listeners('foo');
+  //   fl = e.listeners('foo');
 
-    assert(isArray(e._events.foo.arr));
-    assert(arrayLen(e._events.foo.arr) EQ 2);
-    assert(structCompare(getMetaData(e._events.foo.arr[1]),getMetaData(fail)));
-    assert(structCompare(getMetaData(e._events.foo.arr[2]),getMetaData(assert)));
+  //   assert(isArray(e._events.foo.arr));
+  //   assert(arrayLen(e._events.foo.arr) EQ 2);
+  //   assert(structCompare(getMetaData(e._events.foo.arr[1]),getMetaData(fail)));
+  //   assert(structCompare(getMetaData(e._events.foo.arr[2]),getMetaData(assert)));
     
-    assert(isArray(fl));
-    assert(arrayLen(fl) EQ 2);
-    assert(structCompare(getMetaData(fl[1]),getMetaData(fail)));
-    assert(structCompare(getMetaData(fl[2]),getMetaData(assert)));
+  //   assert(isArray(fl));
+  //   assert(arrayLen(fl) EQ 2);
+  //   assert(structCompare(getMetaData(fl[1]),getMetaData(fail)));
+  //   assert(structCompare(getMetaData(fl[2]),getMetaData(assert)));
     
-    console.log('ok');
-  }
+  //   console.log('ok');
+  // }
 
 
 
-  public void function should_modify_in_emit() {
-    var callbacks_called = [];
+  // public void function should_modify_in_emit() {
+  //   var callbacks_called = [];
 
-    var e = new core.emitter();
+  //   var e = new core.emitter();
     
-    var callback1 = function() {
-      var myself = getMetaData(callback1);
-      console.log("callback1 = #myself.name#");
-      callbacks_called.add('callback1');
-      e.on('foo', callback2);
-      e.on('foo', callback3);
-      e.removeListener('foo', callback1);
-    }
+  //   var callback1 = function() {
+  //     var myself = getMetaData(callback1);
+  //     console.log("callback1 = #myself.name#");
+  //     callbacks_called.add('callback1');
+  //     e.on('foo', callback2);
+  //     e.on('foo', callback3);
+  //     e.removeListener('foo', callback1);
+  //   }
 
-    var callback2 = function() {
-      var myself = getMetaData(callback2);
-      console.log("callback2 = #myself.name#");
-      callbacks_called.add('callback2');
-      e.removeListener('foo', callback2);
-    }
+  //   var callback2 = function() {
+  //     var myself = getMetaData(callback2);
+  //     console.log("callback2 = #myself.name#");
+  //     callbacks_called.add('callback2');
+  //     e.removeListener('foo', callback2);
+  //   }
 
-    var callback3 = function() {
-      var myself = getMetaData(callback3);
-      console.log("callback3 = #myself.name#");
-      callbacks_called.add('callback3');
-      e.removeListener('foo', callback3);
-    }
+  //   var callback3 = function() {
+  //     var myself = getMetaData(callback3);
+  //     console.log("callback3 = #myself.name#");
+  //     callbacks_called.add('callback3');
+  //     e.removeListener('foo', callback3);
+  //   }
 
-    e.on('foo', callback1);
+  //   e.on('foo', callback1);
     
-    assertEquals(1, arrayLen(e.listeners('foo')));
-    e.emit('foo');
-    assertEquals(2, arrayLen(e.listeners('foo')));
-    assertEquals(['callback1'], callbacks_called);
+  //   assertEquals(1, arrayLen(e.listeners('foo')));
+  //   e.emit('foo');
+  //   assertEquals(2, arrayLen(e.listeners('foo')));
+  //   assertEquals(['callback1'], callbacks_called);
 
-    e.emit('foo');
-    assertEquals(0, arrayLen(e.listeners('foo')));
-    assertEquals(['callback1', 'callback2', 'callback3'], callbacks_called);
+  //   e.emit('foo');
+  //   assertEquals(0, arrayLen(e.listeners('foo')));
+  //   assertEquals(['callback1', 'callback2', 'callback3'], callbacks_called);
 
-    e.emit('foo');
-    assertEquals(0, arrayLen(e.listeners('foo')));
-    assertEquals(['callback1', 'callback2', 'callback3'], callbacks_called);
+  //   e.emit('foo');
+  //   assertEquals(0, arrayLen(e.listeners('foo')));
+  //   assertEquals(['callback1', 'callback2', 'callback3'], callbacks_called);
 
-    e.on('foo', callback1);
-    e.on('foo', callback2);
-    assertEquals(2, arrayLen(e.listeners('foo')));
-    e.removeAllListeners('foo');
-    assertEquals(0, arrayLen(e.listeners('foo')));
+  //   e.on('foo', callback1);
+  //   e.on('foo', callback2);
+  //   assertEquals(2, arrayLen(e.listeners('foo')));
+  //   e.removeAllListeners('foo');
+  //   assertEquals(0, arrayLen(e.listeners('foo')));
     
-    // Verify that removing callbacks while in emit allows emits to propagate to
-    // all listeners
-    callbacks_called = [];
+  //   // Verify that removing callbacks while in emit allows emits to propagate to
+  //   // all listeners
+  //   callbacks_called = [];
 
-    e.on('foo', callback2);
-    e.on('foo', callback3);
-    assertEquals(2, arrayLen(e.listeners('foo')));
-    e.emit('foo');
-    assertEquals(['callback2', 'callback3'], callbacks_called);
-    assertEquals(0, arrayLen(e.listeners('foo')));
-  }
+  //   e.on('foo', callback2);
+  //   e.on('foo', callback3);
+  //   assertEquals(2, arrayLen(e.listeners('foo')));
+  //   e.emit('foo');
+  //   assertEquals(['callback2', 'callback3'], callbacks_called);
+  //   assertEquals(0, arrayLen(e.listeners('foo')));
+  // }
 
-  public void function should_num_args() {
-    var e = new core.emitter();
-    var num_args_emited = [];
-    var process = new core.emitter();
+  // public void function should_num_args() {
+  //   var e = new core.emitter();
+  //   var num_args_emited = [];
+  //   var process = new core.emitter();
 
-    e.on('numArgs', function() {
-      var numArgs = structCount(arguments);
-      console.log('numArgs: ' & numArgs);
-      num_args_emited.add(numArgs);
-    });
+  //   e.on('numArgs', function() {
+  //     var numArgs = structCount(arguments);
+  //     console.log('numArgs: ' & numArgs);
+  //     num_args_emited.add(numArgs);
+  //   });
 
-    console.log('start');
+  //   console.log('start');
 
-    e.emit('numArgs');
-    e.emit('numArgs', "");
-    e.emit('numArgs', "", "");
-    e.emit('numArgs', "", "", "");
-    e.emit('numArgs', "", "", "", "");
-    e.emit('numArgs', "", "", "", "", "");
+  //   e.emit('numArgs');
+  //   e.emit('numArgs', "");
+  //   e.emit('numArgs', "", "");
+  //   e.emit('numArgs', "", "", "");
+  //   e.emit('numArgs', "", "", "", "");
+  //   e.emit('numArgs', "", "", "", "", "");
 
-    process.on('exit', function() {
-      assertEquals([0, 1, 2, 3, 4, 5], num_args_emited);
-    });
-  }
+  //   process.on('exit', function() {
+  //     assertEquals([0, 1, 2, 3, 4, 5], num_args_emited);
+  //   });
+  // }
 
-  public any function should_test_once() {
-    var e = new core.emitter();
-    var times_hello_emited = 0;
-    var process = new core.emitter();
+  // public any function should_test_once() {
+  //   var e = new core.emitter();
+  //   var times_hello_emited = 0;
+  //   var process = new core.emitter();
     
-    e.once('hello', function(a, b) {
-      times_hello_emited++;
-    });
+  //   e.once('hello', function(a, b) {
+  //     times_hello_emited++;
+  //   });
 
-    e.emit('hello', 'a', 'b');
-    e.emit('hello', 'a', 'b');
-    e.emit('hello', 'a', 'b');
-    e.emit('hello', 'a', 'b');
+  //   e.emit('hello', 'a', 'b');
+  //   e.emit('hello', 'a', 'b');
+  //   e.emit('hello', 'a', 'b');
+  //   e.emit('hello', 'a', 'b');
 
-    var remove = function() {
-      fail(1, 0, 'once->foo should not be emitted', '!');
-    };
+  //   var remove = function() {
+  //     fail(1, 0, 'once->foo should not be emitted', '!');
+  //   };
 
-    e.once('foo', remove);
-    e.removeListener('foo', remove);
-    e.emit('foo');
+  //   e.once('foo', remove);
+  //   e.removeListener('foo', remove);
+  //   e.emit('foo');
 
-    process.on('exit', function() {
-      assertEquals(1, times_hello_emited);
-    });
-  }
+  //   process.on('exit', function() {
+  //     assertEquals(1, times_hello_emited);
+  //   });
+  // }
 
   public void function should_pass_remove_listeners() {
    var count = 0;
@@ -330,17 +330,17 @@ component name="eventsTests" extends="mxunit.framework.TestCase" {
     var e1 = new core.emitter();
     e1.on('hello', listener1);
     e1.on('removeListener',function(name,cb) {
-      assertEquals(name, 'hello');
-      assertEquals(cb, listener1);
+      assertEquals(name, 'hello','#name# = hello');
+      assert(structCompare(getMetaData(cb), getMetaData(listener1)), 'cb = listener1');
     });
+
     e1.removeListener('hello', listener1);
-    assertEquals([], e1.listeners('hello'));
+    assertEquals([], e1.listeners('hello'),'[] = #serialize(e1.listeners('hello'))#');
 
     var e2 = new core.emitter();
     e2.on('hello', listener1);
     e2.on('removeListener', fail);
     e2.removeListener('hello', listener2);
-    writeDump(var=e2,abort=true);
     assertEquals([listener1], e2.listeners('hello'));
 
     // var e3 = new core.emitter();
@@ -376,14 +376,14 @@ component name="eventsTests" extends="mxunit.framework.TestCase" {
     e1.on('removeListener', expect(['bar', 'baz', 'baz']));
     e1.removeAllListeners('bar');
     e1.removeAllListeners('baz');
-    assert.deepEqual(e1.listeners('foo'), [listener]);
-    assert.deepEqual(e1.listeners('bar'), []);
-    assert.deepEqual(e1.listeners('baz'), []);
+    assertEquals(e1.listeners('foo'), [listener]);
+    assertEquals(e1.listeners('bar'), []);
+    assertEquals(e1.listeners('baz'), []);
     // after calling removeAllListeners,
     // the old listeners array should stay unchanged
-    assert.deepEqual(fooListeners, [listener]);
-    assert.deepEqual(barListeners, [listener]);
-    assert.deepEqual(bazListeners, [listener, listener]);
+    assertEquals(fooListeners, [listener]);
+    assertEquals(barListeners, [listener]);
+    assertEquals(bazListeners, [listener, listener]);
     // after calling removeAllListeners,
     // new listeners arrays are different from the old
     assert.notEqual(e1.listeners('bar'), barListeners);
@@ -397,8 +397,8 @@ component name="eventsTests" extends="mxunit.framework.TestCase" {
     e2.on('removeListener', expect(['foo', 'bar']));
     e2.removeAllListeners();
     console.error(e2);
-    assert.deepEqual([], e2.listeners('foo'));
-    assert.deepEqual([], e2.listeners('bar'));
+    assertEquals([], e2.listeners('foo'));
+    assertEquals([], e2.listeners('bar'));
   }
 
   public void function setUp() {
@@ -460,7 +460,7 @@ component name="eventsTests" extends="mxunit.framework.TestCase" {
     var actual = [];
     var process = new core.emitter();
     process.on('exit', function() {
-      assert.deepEqual(actual.sort(), expected.sort());
+      assertEquals(actual.sort(), expected.sort());
     });
     listener = function (name) {
       actual.push(name)

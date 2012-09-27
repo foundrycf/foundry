@@ -56,7 +56,7 @@ component name="emitter" {
 
 	  if (!structKeyExists(this,'_events')) return false;
 
-	  if(!structKeyExists(this._events,type)) throw "No event type [#type#] bound.";
+	  if(!structKeyExists(this._events,type)) return console.error("No event type [#type#] bound.");
 	  var handler = this._events[type];
 
 	  if (!isDefined("handler") AND !_.isFunction(handler)) return false;
@@ -137,10 +137,8 @@ component name="emitter" {
 	  if (!structKeyExists(this._events,type)) {
 	  	this._events[type] = new Event(type);
 	  	this._events[type].add(listener);
-	  	console.log("addListener(#getMetaData(listener).name#)");
 	  } else {
 	    this._events[type].add(listener);
-	  	console.log("addListener(#getMetaData(listener).name#)");
 	  }
 
 	  // Check for listener leak
@@ -178,7 +176,8 @@ component name="emitter" {
 	  var self = this;
 	  var listnr = arguments.listener;
 	  var args = structCopy(arguments);
-	  g = function() {
+	  
+	  var g = function() {
 	    self.removeListener(type, g);
 	    listnr(argumentCollection=args);
 	  };
@@ -215,8 +214,7 @@ component name="emitter" {
 
 	    	if (position < 0) return this;
 	    	var removedItem = list.splice(position,1).arr[1];
-	    	console.log("removedListener(#getMetaData(removedItem).name#)");
-	    	console.log(serializeJson(list));
+	    	
 	    	if (arrayLen(list.arr) EQ 0) {
 				structDelete(this._events,type);
 

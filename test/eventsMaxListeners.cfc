@@ -1,15 +1,13 @@
 component name="testAddListeners" extends="mxunit.framework.TestCase" {
-	var common = require('../common');
-	var assert = require('assert');
-	var events = require('events');
+  public void function should_work() {
 
 	var gotEvent = false;
 
-	process.on('exit', function() {
-	  assert(gotEvent);
-	});
+	thread name="assertIt" action="sleep" duration="50" {
+	  assertTrue(gotEvent);
+	};
 
-	var e = new events.EventEmitter();
+	var e = new core.emitter();
 
 	e.on('maxListeners', function() {
 	  gotEvent = true;
@@ -19,5 +17,5 @@ component name="testAddListeners" extends="mxunit.framework.TestCase" {
 	e.setMaxListeners(42);
 
 	e.emit('maxListeners');
-
+	}
 }

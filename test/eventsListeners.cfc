@@ -1,29 +1,41 @@
 component name="testAddListeners" extends="mxunit.framework.TestCase" {
-	function listener() {}
-	function listener2() {}
+	public void function e1_should_work() {
+	    variables.console = new core.console();
+	    
+	    listener = function() {}
+		listener2 = function() {}
 
-	var e1 = new events.EventEmitter();
-	e1.on('foo', listener);
-	var fooListeners = e1.listeners('foo');
-	assert.deepEqual(e1.listeners('foo'), [listener]);
-	e1.removeAllListeners('foo');
-	assert.deepEqual(e1.listeners('foo'), []);
-	assert.deepEqual(fooListeners, [listener]);
+		var e1 = new core.emitter();
+		e1.on('foo', listener);
+		var fooListeners = e1.listeners('foo');
+		assertEquals(e1.listeners('foo').arr, [listener]);
 
-	var e2 = new events.EventEmitter();
-	e2.on('foo', listener);
-	var e2ListenersCopy = e2.listeners('foo');
-	assert.deepEqual(e2ListenersCopy, [listener]);
-	assert.deepEqual(e2.listeners('foo'), [listener]);
-	e2ListenersCopy.push(listener2);
-	assert.deepEqual(e2.listeners('foo'), [listener]);
-	assert.deepEqual(e2ListenersCopy, [listener, listener2]);
+		e1.removeAllListeners('foo');
 
-	var e3 = new events.EventEmitter();
-	e3.on('foo', listener);
-	var e3ListenersCopy = e3.listeners('foo');
-	e3.on('foo', listener2);
-	assert.deepEqual(e3.listeners('foo'), [listener, listener2]);
-	assert.deepEqual(e3ListenersCopy, [listener]);
-
+		assertEquals(e1.listeners('foo').arr, []);
+		assertEquals(fooListeners.arr, [listener]);
+	}
+public void function e2_should_work() {
+	  
+	    listener = function() {}
+		listener2 = function() {}
+		var e2 = new core.emitter();
+		e2.on('foo', listener);
+		var e2ListenersCopy = duplicate(e2.listeners('foo'));
+		assertEquals(e2ListenersCopy.arr, [listener]);
+		assertEquals(e2.listeners('foo').arr, [listener]);
+		e2ListenersCopy.add(listener2);
+		assertEquals(e2.listeners('foo').arr, [listener]);
+		assertEquals(e2ListenersCopy.arr, [listener, listener2]);
+}
+public void function e3_should_work() {
+	    listener = function() {}
+		listener2 = function() {}
+		var e3 = new core.emitter();
+		e3.on('foo', listener);
+		var e3ListenersCopy = duplicate(e3.listeners('foo'));
+		e3.on('foo', listener2);
+		assertEquals(e3.listeners('foo').arr, [listener, listener2]);
+		assertEquals(e3ListenersCopy.arr, [listener]);
+	}
 }

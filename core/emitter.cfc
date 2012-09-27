@@ -1,4 +1,4 @@
-component name="events" {
+component name="emitter" {
 	property name="maxListeners" type="numeric";
 
 	//variables.domain = {};
@@ -76,7 +76,7 @@ component name="events" {
 	        break;
 	      // slower
 	      default:
-	        var l = arguments.length;
+	        var l = listLen(structKeyList(arguments));
 	        var args = new Array(l - 1);
 	        for (var i = 1; i < l; i++) args[i - 1] = arguments[i];
 	        handler(argumentCollection=args);
@@ -92,7 +92,7 @@ component name="events" {
 	    if (this.domain) {
 	      this.domain.enter();
 	    }
-	    var l = arguments.length;
+	    var l = listLen(structKeyList(arguments));
 	    var args = new Array(l - 1);
 	    for (var i = 1; i < l; i++) args[i - 1] = arguments[i];
 
@@ -122,35 +122,30 @@ component name="events" {
 
 	  if(!structKeyExists(this,'_events')) this['_events'] = {};
 
-	  // To avoid recursion in the case that type == "newListeners"! Before
-	  // adding it to the listeners, first emit "newListeners".
+		// To avoid recursion in the case that type == "newListeners"! Before
+		// adding it to the listeners, first emit "newListeners".
 	  if (structKeyExists(this._events,"newListener")) {
 	    this.emit('newListener', type, (structKeyExists(listener,'listener') && _.isFunction(listener.listener)) ?
 	              listener.listener : listener);
 	  }
 
 	  if (!structKeyExists(this._events,type)) {
-	    // Optimize the case of one listener. Don't need the extra array object.
-	    this._events[type] = listener;
-	  } else if (_.isArray(this._events[type])) {
-
-	    // If we've already got an array, just append.
-	    this._events[type].add(listener);
+	  	this._events[type] = new Event();
+	  	this._events[type].add(listener);
 	  } else {
-	    // Adding the second element, need to change to array.
-	    this._events[type] = [this._events[type], listener];
+	    this._events[type].add(listener);
 	  }
 
 	  // Check for listener leak
-	  if (_.isArray(this._events[type]) && !this._events[type].warned) {
-	    var m;
-	    if (this._maxListeners !== undefined) {
+	  if (_.isArray(this._events[type].arr) && !this._events[type].warned) {
+	    var m = 0;
+	    if (structKeyExists(this,"_maxListeners")) {
 	      m = this._maxListeners;
 	    } else {
 	      m = defaultMaxListeners;
 	    }
-
-	    if (m && m > 0 && this._events[type].length > m) {
+	    console.log(this._events[type].length());
+	    if (m > 0 && this._events[type].length() >= m) {
 	      this._events[type].warned = true;
 	      console.error('(foundry) warning: possible EventEmitter memory ' &
 	                    'leak detected. %d listeners added. ' &
@@ -233,20 +228,20 @@ component name="events" {
 	};
 
 	public any function removeAllListeners(type) {
-	  if (!this._events) return this;
+	  if (!structKeyExists(this,'_events')) return this;
 
 	  // fast path
-	  if (!this._events.removeListener) {
-	    if (arguments.length EQ 0) {
+	  if (!structKeyExists(this._events,'removeListener')) {
+	    if (listLen(structKeyList(arguments)) EQ 0) {
 	      this._events = {};
-	    } else if (type && this._events && this._events[type]) {
-	      this._events[type] = null;
+	    } else if (structKeyExists(arguments,'type') && structKeyExists(this,'_events') && structKeyExists(this._events,type)) {
+	      structDelete(this._events,type);
 	    }
 	    return this;
 	  }
 
 	  // slow(ish) path, emit 'removeListener' events for all removals
-	  if (arguments.length EQ 0) {
+	  if (listLen(structKeyList(arguments)) EQ 0) {
 	    for (var key in this._events) {
 	      if (key EQ 'removeListener') continue;
 	      this.removeAllListeners(key);
@@ -256,7 +251,7 @@ component name="events" {
 	    return this;
 	  }
 
-	  var listeners = this._events[type];
+	  var listeners = this._events[type].arr;
 	  if (isArray(listeners)) {
 	    while (listeners.length) {
 	      // LIFO order
@@ -271,11 +266,11 @@ component name="events" {
 	};
 
 	public any function listeners(type) {
-	  if (!this._events || !this._events[type]) return [];
-	  if (!isArray(this._events[type])) {
-	    return [this._events[type]];
+	  if (!structKeyExists(this,'_events') || !structKeyExists(this._events,type)) return new Event();
+	  if (!_.isArray(this._events[type].arr)) {
+	    return new Event(this._events[type]);
 	  }
-	  return this._events[type].slice(0);
+	  return this._events[type];
 	};
 
 

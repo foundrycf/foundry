@@ -1,5 +1,5 @@
-component name="Array" {
-	public Array function init(Array ary = []) {
+component name="ArrayObj" {
+	public ArrayObj function init(Array ary = []) {
 		this['arr'] = arguments.ary;
 		this['utils'] = createObject("java","org.apache.commons.lang.ArrayUtils");
 
@@ -14,6 +14,10 @@ component name="Array" {
 		var argCount = listLen(structKeyList(arguments));
 		
 		return this.arr.subList();
+	}
+
+	public void function add(str) {
+		this.arr.add(str);
 	}
 
 	public array function reverse() {

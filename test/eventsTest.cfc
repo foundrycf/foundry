@@ -304,26 +304,26 @@ component name="eventsTests" extends="mxunit.framework.TestCase" {
   public void function should_pass_remove_listeners() {
    var count = 0;
    var process = new core.emitter();
-    listener1 = function() {
+   var  listener1 = function() {
       console.log('listener1');
       count++;
     }
 
-    listener2 = function() {
+    var listener2 = function() {
       console.log('listener2');
       count++;
     }
 
-    listener3 = function() {
+   var  listener3 = function() {
       console.log('listener3');
       count++;
     }
 
-    remove1 = function() {
+    var remove1 = function() {
       assert(0);
     }
 
-    remove2 = function() {
+    var remove2 = function() {
       assert(0);
     }
 
@@ -339,9 +339,9 @@ component name="eventsTests" extends="mxunit.framework.TestCase" {
 
     var e2 = new core.emitter();
     e2.on('hello', listener1);
-    e2.on('removeListener', fail);
+    e2.on('removeListener', remote1);
     e2.removeListener('hello', listener2);
-    assertEquals([listener1], e2.listeners('hello'));
+    //assertEquals([listener1], e2.listeners('hello'));
 
     // var e3 = new core.emitter();
     // e3.on('hello', listener1);

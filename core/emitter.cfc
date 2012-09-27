@@ -137,8 +137,10 @@ component name="emitter" {
 	  if (!structKeyExists(this._events,type)) {
 	  	this._events[type] = new Event(type);
 	  	this._events[type].add(listener);
-	  	} else {
+	  	console.log("addListener(#getMetaData(listener).name#)");
+	  } else {
 	    this._events[type].add(listener);
+	  	console.log("addListener(#getMetaData(listener).name#)");
 	  }
 
 	  // Check for listener leak
@@ -195,26 +197,27 @@ component name="emitter" {
 
 	  // does not use listeners(), so no side effect of creating _events[type]
 	  if (!structKeyExists(this,'_events') || !structKeyExists(this._events,type)) return this;
-		var list = this._events[type].arr;
+		var list = this._events[type];
 		
-		if (_.isArray(list)) {
-		    var position = -1;
+		if (isArray(list.arr)) {
+		    var position = 0;
+			var length = list.length();
+		    for (var i = 1; i <= length; i++) {
+		    	var listItem = list.arr[i];
+				var listMetaData = getMetaData(listItem);
+				var listenerMetaData = getMetaData(listener);
 
-		    lengthList = arrayLen(list);
-		    for (var i = 0; i < lengthList; i++) {
-		    	var listMetaData = getMetaData(list[i+1]);
-		    	var listenerMetaData = getMetaData(listener);
-		      if ((listMetaData.name EQ listenerMetaData.name) || (structKeyExists(list[i+1],'listener') AND list[i+1].listener EQ listener))
-		      {
-		        position = i;
-		        break;
-		      }
+				if ((listMetaData.name EQ listenerMetaData.name) || (structKeyExists(listItem,'listener') AND listItem.listener EQ listener)) {
+					position = i;
+					break;
+				}
 		    }
 
 	    	if (position < 0) return this;
-	    	list = _.splice(list,position,1);
-
-	    	if (arrayLen(list) EQ 0) {
+	    	var removedItem = list.splice(position,1).arr[1];
+	    	console.log("removedListener(#getMetaData(removedItem).name#)");
+	    	console.log(serializeJson(list));
+	    	if (arrayLen(list.arr) EQ 0) {
 				structDelete(this._events,type);
 
 				if (structKeyExists(this._events,'removeListener')) {

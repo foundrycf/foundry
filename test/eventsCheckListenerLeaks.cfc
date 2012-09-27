@@ -1,4 +1,4 @@
-component name="testAddListeners" extends="mxunit.framework.TestCase" {
+component name="eventsTests" extends="mxunit.framework.TestCase" {
 	public void function should_work() {
 	    var e = new core.emitter();
 	    variables.console = new core.console();

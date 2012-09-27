@@ -56,6 +56,7 @@ component name="emitter" {
 
 	  if (!structKeyExists(this,'_events')) return false;
 
+	  if(!structKeyExists(this._events,type)) throw "No event type [#type#] bound.";
 	  var handler = this._events[type];
 
 	  if (!isDefined("handler") AND !_.isFunction(handler)) return false;
@@ -173,10 +174,11 @@ component name="emitter" {
 	  }
 
 	  var self = this;
-	  
+	  var listnr = arguments.listener;
+	  var args = structCopy(arguments);
 	  g = function() {
 	    self.removeListener(type, g);
-	    this.listener(this, arguments);
+	    listnr(argumentCollection=args);
 	  };
 
 	  //g.listener = listener;
@@ -192,42 +194,40 @@ component name="emitter" {
 	  }
 
 	  // does not use listeners(), so no side effect of creating _events[type]
-	  if (!this._events || !this._events[type]) return this;
+	  if (!structKeyExists(this,'_events') || !structKeyExists(this._events,type)) return this;
+		var list = this._events[type].arr;
+		
+		if (_.isArray(list)) {
+		    var position = -1;
 
-	  var list = this._events[type];
+		    lengthList = arrayLen(list);
+		    for (var i = 0; i < lengthList; i++) {
+		    	var listMetaData = getMetaData(list[i+1]);
+		    	var listenerMetaData = getMetaData(listener);
+		      if ((listMetaData.name EQ listenerMetaData.name) || (structKeyExists(list[i+1],'listener') AND list[i+1].listener EQ listener))
+		      {
+		        position = i;
+		        break;
+		      }
+		    }
 
-	  if (_.isArray(list)) {
-	    var position = -1;
-	    
-	    lengthList = arrayLen(list);
-	    for (var i = 1; i <= lengthList; i++) {
-	      if (list[i] EQ listener ||
-	          (list[i].listener && list[i].listener EQ listener))
-	      {
-	        position = i;
-	        break;
-	      }
-	    }
+	    	if (position < 0) return this;
+	    	list = _.splice(list,position,1);
 
-	    if (position < 0) return this;
-	    
-	    list.splice(position, 1);
-	    
-	    if (list.length == 0)
-	      structDelete(this._events,type);
+	    	if (arrayLen(list) EQ 0) {
+				structDelete(this._events,type);
 
-	    if (this._events.removeListener) {
-	      this.emit('removeListener', type, listener);
-	    }
-	  } else if (list EQ listener ||
-	             (list.listener && list.listener EQ listener))
-	  {
-	    structDelete(this._events,type);
+				if (structKeyExists(this._events,'removeListener')) {
+					this.emit('removeListener', type, listener);
+				}
+			}
+		} else if (list EQ listener || (list.listener && list.listener EQ listener)) {
+			structDelete(this._events,type);
 
-	    if (this._events.removeListener) {
-	      this.emit('removeListener', type, listener);
-	    }
-	  }
+			if (structKeyExists(this._events,'removeListener')) {
+				this.emit('removeListener', type, listener);
+			}
+		}
 
 	  return this;
 	};
@@ -278,13 +278,47 @@ component name="emitter" {
 	  return this._events[type].arr;
 	};
 	//udf from cflib
-	private array function buildArray() {
-	    var result = ArrayNew(1);
-	    var to = ArrayLen(arguments);
-	    var i = 0;
-	    for (i=1; i LTE to; i=i+1)
-	        result[i] = Duplicate(arguments[i]);
-	    return result;
+	function structCompare(LeftStruct,RightStruct) {
+	 //WriteDump("aya1.......................", "console");
+	 var result = true;
+	 var LeftStructKeys = "";
+	 var RightStructKeys = "";
+	 var key = "";
+	  
+	 //Make sure both params are structures
+	 if (NOT (isStruct(LeftStruct) AND isStruct(RightStruct))) return false;
+	 
+	 //Make sure both structures have the same keys
+	 LeftStructKeys = ListSort(StructKeyList(LeftStruct),"TextNoCase","ASC");
+	 RightStructKeys = ListSort(StructKeyList(RightStruct),"TextNoCase","ASC");
+	 if(LeftStructKeys neq RightStructKeys) return false;
+	  
+	 // Loop through the keys and compare them one at a time
+	 for (key in LeftStruct) {
+	  //checking if elements are defined
+	  if(structKeyExists(LeftStruct,"key") and structKeyExists(RightStruct,"key"))
+	  {
+	   //Key is a structure, call structCompare()
+	   if (isStruct(LeftStruct[key])){
+	    result = structCompare(LeftStruct[key],RightStruct[key]);
+	    //WriteDump("aya1.......................", "console");
+	    if (NOT result) return false;
+	   //Key is an array, call arrayCompare()
+	   } else if (isArray(LeftStruct[key])){
+	    result = arrayCompare(LeftStruct[key],RightStruct[key]);
+	    //WriteDump("nahi fata..................", "console");
+	    if (NOT result) return false;
+	   //Key is a query, call queryCompare()
+	   } else if (isQuery(LeftStruct[key])){
+	    result = queryCompare(LeftStruct[key],RightStruct[key]);
+	    if (NOT result) return false;
+	   // A simple type comparison here
+	   } else {
+	    if(LeftStruct[key] IS NOT RightStruct[key]) return false;
+	   }
+	  } else if((structKeyExists(LeftStruct,"key") and (not structKeyExists(RightStruct,"key"))) or ((not structKeyExists(LeftStruct,"key")) and structKeyExists(RightStruct,"key"))) return false;
+	 }
+	 return true;
 	}
 
 

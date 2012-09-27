@@ -122,24 +122,15 @@ component name="eventsTests" extends="mxunit.framework.TestCase" {
     assertEquals(e3ListenersCopy, [listener]);
   }
 
-  public void function setUp() {
-    variables.console = new core.console();
-    
-     console.log("========");
-  }
-  public void function tearDown() {
-     console.log("========");
-  }
-
   public void function gotevent_should_be_true() {
-
     var gotEvent = false;
-
-    thread name="assertIt" action="sleep" duration="50" {
-      assertTrue(gotEvent);
-    };
-
     var e = new core.emitter();
+    
+    process.on("exit",function() {
+      if(not gotEvent) {
+        fail("failed");
+      }
+    });
 
     e.on('maxListeners', function() {
       gotEvent = true;
@@ -149,5 +140,79 @@ component name="eventsTests" extends="mxunit.framework.TestCase" {
     e.setMaxListeners(42);
 
     e.emit('maxListeners');
+  }
+
+  public void function should_modify_in_emit() {
+    var callbacks_called = [];
+
+    var e = new core.emitter();
+
+    callback1 = function() {
+      callbacks_called.add('callback1');
+      e.on('foo', callback2);
+      e.on('foo', callback3);
+      //writeDump(var=e.listeners('foo'));
+      e.removeListener('foo', callback1);
+      //writeDump(var=e.listeners('foo'),abort=true);
+    }
+
+    callback2 = function() {
+      callbacks_called.add('callback2');
+      e.removeListener('foo', callback2);
+    }
+
+    callback3 = function() {
+      callbacks_called.add('callback3');
+      e.removeListener('foo', callback3);
+    }
+
+    e.on('foo', callback1);
+    assertEquals(1, arrayLen(e.listeners('foo')));
+
+    e.emit('foo');
+    assertEquals(2, arrayLen(e.listeners('foo')));
+    //assertEquals(['callback1'], callbacks_called);
+
+    // e.emit('foo');
+    // assertEquals(0, arrayLen(e.listeners('foo')));
+    // assertEquals(['callback1', 'callback2', 'callback3'], callbacks_called);
+
+    // e.emit('foo');
+    // assertEquals(0, arrayLen(e.listeners('foo')));
+    // assertEquals(['callback1', 'callback2', 'callback3'], callbacks_called);
+
+    // e.on('foo', callback1);
+    // e.on('foo', callback2);
+    // assertEquals(2, arrayLen(e.listeners('foo')));
+    // e.removeAllListeners('foo');
+    // assertEquals(0, arrayLen(e.listeners('foo')));
+    // // Verify that removing callbacks while in emit allows emits to propagate to
+    // // all listeners
+    // callbacks_called = [];
+
+    // e.on('foo', callback2);
+    // e.on('foo', callback3);
+    // assertEquals(2, arrayLen(e.listeners('foo')));
+    // e.emit('foo');
+    // assertEquals(['callback2', 'callback3'], callbacks_called);
+    // assertEquals(0, arrayLen(e.listeners('foo')));
+  }
+  
+
+  public void function setUp() {
+    variables.process = new core.emitter();
+    
+    process.on("exit",function(){
+      console.log("exited");
+    });
+
+    variables.console = new core.console();
+    
+     console.log("========");
+  }
+  public void function tearDown() {
+     process.emit("exit");
+      
+     console.log("========");
   }
 }

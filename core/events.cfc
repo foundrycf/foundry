@@ -1,4 +1,4 @@
-component name="emitter" {
+component name="events" {
 	property name="maxListeners" type="numeric";
 
 	//variables.domain = {};
@@ -28,44 +28,42 @@ component name="emitter" {
 	  this._maxListeners = n;
 	};
 
+
 	public any function emit() {
-		var type = arguments[1];
-		//If there is no 'error' event listener then throw.
-		if (type EQ 'error') {
-			if (!this._events || !this._events.error || (_.isArray(this._events.error) && !arrayLen(this._events.error)))
-			{	
-				//Maybe we can use the "domain" logic for "application" scoped events?
-				// if (this.domain) {
-				//   var er = arguments[1];
-				//   er.domain_emitter = this;
-				//   er.domain = this.domain;
-				//   er.domain_thrown = false;
-				//   this.domain.emit('error', er);
-				//   return false;
-				// }
+	  var type = arguments[1];
+	  // If there is no 'error' event listener then throw.
+	  if (type EQ 'error') {
+	    if (!this._events || !this._events.error || (_.isArray(this._events.error) && !arrayLen(this._events.error)))
+	    {
+	      // if (this.domain) {
+	      //   var er = arguments[1];
+	      //   er.domain_emitter = this;
+	      //   er.domain = this.domain;
+	      //   er.domain_thrown = false;
+	      //   this.domain.emit('error', er);
+	      //   return false;
+	      // }
 
-			if (arguments[1]) {
-				throw arguments[1]; // Unhandled 'error' event
-			} else {
-				throw("Uncaught, unspecified 'error' event.");
-			}
-
-			return false;
-			}
-		}
+	      if (arguments[1]) {
+	        throw arguments[1]; // Unhandled 'error' event
+	      } else {
+	        throw("Uncaught, unspecified 'error' event.");
+	      }
+	      return false;
+	    }
+	  }
 
 	  if (!structKeyExists(this,'_events')) return false;
 
 	  var handler = this._events[type];
-
-	  if (!isDefined("handler") AND !_.isFunction(handler)) return false;
+	  if (!isDefined("handler") OR !_.isFunction(handler)) return false;
 	  //IS HANDLER A FUNCTION?
 	  if (_.isFunction(handler)) {
 	    // if (this.domain) {
 	    //   this.domain.enter();
 	    // }
 
-	    switch (structCount(arguments)) {
+	    switch (listLen(structKeyList(arguments))) {
 	      // fast cases
 	      case 1:
 	        handler();
@@ -78,7 +76,7 @@ component name="emitter" {
 	        break;
 	      // slower
 	      default:
-	        var l = structCount(arguments);
+	        var l = arguments.length;
 	        var args = new Array(l - 1);
 	        for (var i = 1; i < l; i++) args[i - 1] = arguments[i];
 	        handler(argumentCollection=args);
@@ -90,23 +88,20 @@ component name="emitter" {
 	    return true;
 
 	  //IS HANDLER AN ARRAY?
-	  } else if (_.isArray(handler.arr)) {
-	    // if (this.domain) {
-	    //   this.domain.enter();
-	    // }
-	    
-	    var argLen = structCount(arguments);
-	    var listeners = handler.arr;
+	  } else if (_.isArray(handler)) {
+	    if (this.domain) {
+	      this.domain.enter();
+	    }
+	    var l = arguments.length;
+	    var args = new Array(l - 1);
+	    for (var i = 1; i < l; i++) args[i - 1] = arguments[i];
 
-	    listenerLen = arrayLen(listeners);
-	    args = structCopy(arguments);
-	    structDelete(args,1);
-	    for (var i = 1; i <= listenerLen; i++) {
-	    	//seems dumb that you have to convert it to 
-	    	//a simple var to use the closure...
-	    	//possible Railo 4.0.0.013 bug?
-	    	var func = listeners[i];
-	    	func(argumentCollection=args);
+	    var listeners = handler.slice();
+
+	    l = arrayLen(listeners);
+	    
+	    for (var i = 1; i <= l; i++) {
+	      listeners[i].apply(this, args);
 	    }
 
 	    // if (this.domain) {
@@ -126,31 +121,36 @@ component name="emitter" {
 	  }
 
 	  if(!structKeyExists(this,'_events')) this['_events'] = {};
-		// To avoid recursion in the case that type == "newListeners"! Before
-		// adding it to the listeners, first emit "newListeners".
+
+	  // To avoid recursion in the case that type == "newListeners"! Before
+	  // adding it to the listeners, first emit "newListeners".
 	  if (structKeyExists(this._events,"newListener")) {
 	    this.emit('newListener', type, (structKeyExists(listener,'listener') && _.isFunction(listener.listener)) ?
 	              listener.listener : listener);
 	  }
 
 	  if (!structKeyExists(this._events,type)) {
-	  	this._events[type] = new Event(type);
-	  	this._events[type].add(listener);
-	  	} else {
+	    // Optimize the case of one listener. Don't need the extra array object.
+	    this._events[type] = listener;
+	  } else if (_.isArray(this._events[type])) {
+
+	    // If we've already got an array, just append.
 	    this._events[type].add(listener);
+	  } else {
+	    // Adding the second element, need to change to array.
+	    this._events[type] = [this._events[type], listener];
 	  }
 
 	  // Check for listener leak
-	  if (_.isArray(this._events[type].arr) && !this._events[type].warned) {
-	    var m = 0;
-	    
-	    if (structKeyExists(this,"_maxListeners")) {
+	  if (_.isArray(this._events[type]) && !this._events[type].warned) {
+	    var m;
+	    if (this._maxListeners !== undefined) {
 	      m = this._maxListeners;
 	    } else {
 	      m = defaultMaxListeners;
 	    }
-	    
-	    if (m > 0 && this._events[type].length() > m) {
+
+	    if (m && m > 0 && this._events[type].length > m) {
 	      this._events[type].warned = true;
 	      console.error('(foundry) warning: possible EventEmitter memory ' &
 	                    'leak detected. %d listeners added. ' &
@@ -233,20 +233,20 @@ component name="emitter" {
 	};
 
 	public any function removeAllListeners(type) {
-	  if (!structKeyExists(this,'_events')) return this;
+	  if (!this._events) return this;
 
 	  // fast path
-	  if (!structKeyExists(this._events,'removeListener')) {
-	    if (structCount(arguments) EQ 0) {
+	  if (!this._events.removeListener) {
+	    if (arguments.length EQ 0) {
 	      this._events = {};
-	    } else if (structKeyExists(arguments,'type') && structKeyExists(this,'_events') && structKeyExists(this._events,type)) {
-	      structDelete(this._events,type);
+	    } else if (type && this._events && this._events[type]) {
+	      this._events[type] = null;
 	    }
 	    return this;
 	  }
 
 	  // slow(ish) path, emit 'removeListener' events for all removals
-	  if (structCount(arguments) EQ 0) {
+	  if (arguments.length EQ 0) {
 	    for (var key in this._events) {
 	      if (key EQ 'removeListener') continue;
 	      this.removeAllListeners(key);
@@ -256,7 +256,7 @@ component name="emitter" {
 	    return this;
 	  }
 
-	  var listeners = this._events[type].arr;
+	  var listeners = this._events[type];
 	  if (isArray(listeners)) {
 	    while (listeners.length) {
 	      // LIFO order
@@ -271,21 +271,12 @@ component name="emitter" {
 	};
 
 	public any function listeners(type) {
-	  if (!structKeyExists(this,'_events') || !structKeyExists(this._events,type)) return [];
-	  if (!_.isArray(this._events[type].arr)) {
-	    return new Event(this._events[type]).arr;
+	  if (!this._events || !this._events[type]) return [];
+	  if (!isArray(this._events[type])) {
+	    return [this._events[type]];
 	  }
-	  return this._events[type].arr;
+	  return this._events[type].slice(0);
 	};
-	//udf from cflib
-	private array function buildArray() {
-	    var result = ArrayNew(1);
-	    var to = ArrayLen(arguments);
-	    var i = 0;
-	    for (i=1; i LTE to; i=i+1)
-	        result[i] = Duplicate(arguments[i]);
-	    return result;
-	}
 
 
 	// // Bind one or more space separated events, events, to a callback function. Passing "all" will bind the callback to all events fired.

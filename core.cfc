@@ -52,14 +52,14 @@ component {
 
 			module = load_as_file(thePath);
 			if(!isDefined("module")) {
-				return load_as_directory(thePath);
+				module = load_as_directory(thePath);
 			}
 		} else {
 			console.log("[MODULE] " & x);
 			module = load_foundry_modules(x,Path.dirname(y));
 		}
 
-		if(NOT isDefined("module")) {
+		if(!isObject(module)) {
 			throw(errorCode="fdry001",type="foundry.no_module",message="Foundry module '#x#' not found.");	
 		}
 

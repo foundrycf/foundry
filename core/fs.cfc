@@ -13,9 +13,9 @@ component name="fs" {
 
 	public any function readFile(p,charset = 'utf8',cb) {
 		var err = {};
-		
+		var contents = "";
 		try {
-			fileRead(p);
+			contents = fileRead(p);
 		} catch(any err) {
 			cb(err, contents);
 			return false;

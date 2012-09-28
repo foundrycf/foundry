@@ -13,7 +13,8 @@ component {
 	
 	variables.core_modules = "path,regexp,console,struct,arrayobj,util,fs,emitter,event";
 	variables.Path = new core.Path();
-	
+	variables._ = new core.util();
+		
 	//proxy function for init
 	public any function new() {
 		return this.init(argumentCollection=arguments);
@@ -24,13 +25,13 @@ component {
 		variables.console = new core.Console();
 		var cleanPath = Path.normalize(x);
 		var parts = Path.splitPath(x);
-		var _ = new core.util();
 		var isRelative = !Path.isAbsolute(x);
 		var pathSep = Path.getSep();
 		var isPath = (path.fixSeps(x) CONTAINS pathSep);
 		var y = getComponentMetaData(this).path;
 		var fullPath = Path.join(Path.dirname(y),x);
 		var module = {};
+		var modules_path = path.join(expandPath('/'),'foundry_modules');
 		// 1. If X is a core module,
 		//    a. return the core module
 		//    b. STOP
@@ -39,7 +40,7 @@ component {
 		//    b. LOAD_AS_DIRECTORY(Y + X)
 		// 3. LOAD_FOUNDRY_MODULES(X, dirname(Y))
 		// 4. THROW "not found"
-		console.log(fullPath);
+		//console.log("fullPath: " & fullPath);
 		if(isCoreModule(x)) {
 			console.log("Loading core module: " & cleanPath);
 			return createObject("component","core.#cleanPath#");
@@ -54,7 +55,7 @@ component {
 				return load_as_file(x);
 			}
 		} else {
-			console.log("load_foundry_modules(#x#,#Path.dirname(y)#)");
+			console.log("load_foundry_modules(#x#,#modules_path#)");
 			module = load_foundry_modules(x,Path.dirname(y));
 		}
 
@@ -95,7 +96,7 @@ component {
 		var configFile = Path.join(x,"foundry.json");
 		var indexCFCPath = getCompPath(Path.join(x, "/index.cfc"));
 		var indexCfmPath = Path.join(x, "/index.cfm");
-		
+		console.log("load_as_directory(#x#)");
 		if(isFile(configFile)) {
 			var configContent = deserializeJson(fileRead(configFile));
 
@@ -117,21 +118,18 @@ component {
 		// 	a. LOAD_AS_FILE(DIR/X)
 		// 	b. LOAD_AS_DIRECTORY(DIR/X)
 		var fullPath = "";
-		//writeDump(var=path.relative(start),abort=true);
-		var dirs = foundry_modules_paths(start);
-		for (dir in dirs) {
-			fullPath = Path.join(Path.dirname(start),dir,x);
-			
-			if(isDir(path.resolve(fullPath))) {
-				return load_as_directory(fullPath);
-			} else if (isFile(fullPath)) {
-				return load_as_file(fullPath);
-			}
+		var module_path = foundry_modules_paths(start);
+
+		fullPath = Path.join(module_path,x);
+		console.log("load_foundry_modules: " & fullPath);
+		if(isDir(fullPath)) {
+			return load_as_directory(fullPath);
+		} else if (isFile(fullPath)) {
+			return load_as_file(fullPath);
 		}
 	}
 
 	private any function foundry_modules_paths(start) {
-		writeDump(var=start,abort=true);
 		// 1. let PARTS = path split(START)
 		// 2. let ROOT = index of first instance of "foundry_modules" in PARTS, or 0
 		// 3. let I = count of PARTS - 1
@@ -142,23 +140,42 @@ component {
 		//    b. DIRS = DIRS + DIR
 		//    c. let I = I - 1
 		// 6. return DIRS
-		var parts = Path.splitPath(start);
-		var root = 0;
-		var dirs = [];
-		i = arrayLen(parts)-1;
-		while (i > root) {
-			if (parts[i] EQ "foundry_modules") continue;
-			dir = path.join(parts[i],"foundry_modules");
-			dirs.add(dir);
-			i--;
-		}
+		var currPath = start;
+		var nextPath = path.resolve(currPath,'../');
+		var root = false;
+		var rootPath = path.fixSeps(expandPath("/")).replaceFirst("[\\\/]{1}$","");
+		var dirs = directoryList(path=currPath,listInfo="name");
+		var foundryPaths = [];
 
-		return dirs;
+		console.log("===== #currPath#");
+
+		if(rootPath EQ currPath) {
+			root = true;
+		};
+
+		foundryPaths = arrayFilter(dirs,function(x) {
+			console.log("searching: #x#");
+
+			if(x CONTAINS "foundry_modules") {
+				console.log("found: #x#");
+				return true;
+			} else {
+				return false;
+			}
+		});
+
+		if(arrayLen(foundryPaths) EQ 0 AND NOT root) {
+			return foundry_modules_paths(nextPath);
+		} else {
+			return path.join(currPath,'foundry_modules',foundryPaths);
+		}
 	}
+
+
 
 	private string function getCompPath(x) {
 		var cleanPath = replace(Path.normalize(x),".cfc","");
-		var sep = Path.getSep();
+		var sep = Path.sep();
 
 		return replace(Path.relative(expandPath("/"),cleanPath),sep,".","ALL");
 	}

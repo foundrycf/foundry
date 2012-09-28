@@ -6,21 +6,23 @@
 component accessors=true {
 	property name="sep"
 	type="string";
+	
+	variables.isWindows = (server.os.name EQ "Windows");
+	variables._ = new util();
+	variables.jPath = createObject("java","org.apache.commons.io.FilenameUtils");
+	variables.jRegex = createObject("java","java.util.regex.Pattern");
+	variables.jArrayUtils = createObject("java","org.apache.commons.lang.ArrayUtils");
+	
+	//windows regex
+	variables.splitDeviceRe = "^([\s\S]+[\\\/](?!$)|[\\\/])?((?:\.{1,2}$|[\s\S]+?)?(\.[^.\/\\]*)?)$";
+	variables.splitTailRe = "^([\s\S]+[\\\/](?!$)|[\\\/])?((?:\.{1,2}$|[\s\S]+?)?(\.[^.\/\\]*)?)$";
+	
+	//posix regex
+	variables.splitPathRe = "^(\/?)([\s\S]+\/(?!$)|\/)?((?:\.{1,2}$|[\s\S]+?)?(\.[^.\/]*)?)$";
 
 	public function init() {
-		variables._ = new util();
 		
-		variables.jPath = createObject("java","org.apache.commons.io.FilenameUtils");
-		variables.jRegex = createObject("java","java.util.regex.Pattern");
-		variables.jArrayUtils = createObject("java","org.apache.commons.lang.ArrayUtils");
-		variables.isWindows = server.os.name EQ "Windows";
-		//windows regex
-		variables.splitDeviceRe = "^([\s\S]+[\\\/](?!$)|[\\\/])?((?:\.{1,2}$|[\s\S]+?)?(\.[^.\/\\]*)?)$";
-		variables.splitTailRe = "^([\s\S]+[\\\/](?!$)|[\\\/])?((?:\.{1,2}$|[\s\S]+?)?(\.[^.\/\\]*)?)$";
 		
-		//posix regex
-		variables.splitPathRe = "^(\/?)([\s\S]+\/(?!$)|\/)?((?:\.{1,2}$|[\s\S]+?)?(\.[^.\/]*)?)$";
-
 		this.setSep(sep());
 		return this;
 	}

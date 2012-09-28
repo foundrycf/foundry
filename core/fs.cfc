@@ -21,16 +21,18 @@ component name="fs" {
 			return false;
 		}
 
-		cb(err, contents)
-l
+		cb(err, contents);
+	}
+
 	public any function mkdir(path, mode = 0777, cb) {
+		var _ = new util();
   		if(_.isFunction(mode)) cb = mode;
   		
   		try{
   			console.log(path.resolve(expandPath('/'), path));
-  			directoryCreate(path=path.resolve(expandPath('/'), path), mode=mode);
+  			directoryCreate(path.resolve(expandPath('/'), path));
   		} catch(any err) {
-  			cb(err, contents);
+  			cb(err);
   			return false;
   		}
 
@@ -41,14 +43,14 @@ l
 	// for callbacks that are passed to the binding layer, callbacks that are
 	// invoked from JS already run in the proper scope.
 	private any function makeCallback(cb) {
-	  if (!isFunction(cb)) {
-	    // faster than returning a ref to a global no-op function
-	    return function() {};
-	  }
+		if (!isFunction(cb)) {
+		    // faster than returning a ref to a global no-op function
+		    return function() {};
+		}
 
-	  return function() {
-	    return cb.apply(null, arguments);
-	  };
+		return function() {
+			return cb.apply(null, arguments);
+		};
 	}
 
 	public any function stat(path, cb) {

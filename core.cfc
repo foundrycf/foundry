@@ -14,11 +14,13 @@ component {
 	variables.core_modules = "path,regexp,console,struct,arrayobj,util,fs,emitter,event";
 	variables.Path = new core.Path();
 	variables._ = new core.util();
-		
-	//proxy function for init
-	public any function new() {
-		return this.init(argumentCollection=arguments);
-	}
+	
+	property name="foundry_paths" type="array";
+
+	this.foundry_paths = [
+		expandPath("/"),
+		path.resolve(expandPath("/"),"../")
+	];
 
 	public any function require(x){
 		var Path = new core.Path();
@@ -42,20 +44,18 @@ component {
 		// 4. THROW "not found"
 		//console.log("fullPath: " & fullPath);
 		if(isCoreModule(x)) {
-			console.log("Loading core module: " & cleanPath);
+			console.log("[CORE_MODULE] " & cleanPath);
 			return createObject("component","core.#cleanPath#");
 		} else if (isPath) {
-			console.log("isPath(" & x & " CONTAINS " & pathSep & ") = " & isPath);
-			if(isDir(x)) {
-				console.log("isDir(#fullPath#)");
-			
-				module = load_as_directory(x);
-			} else if (isFile(x)) {
-				console.log("isFile(#fullPath#)");
-				return load_as_file(x);
+			var thePath = path.resolve(path.dirname(y),x);
+			console.log("[PATH] " & thePath);
+
+			module = load_as_file(thePath);
+			if(!isDefined("module")) {
+				return load_as_directory(thePath);
 			}
 		} else {
-			console.log("load_foundry_modules(#x#,#modules_path#)");
+			console.log("[MODULE] " & x);
 			module = load_foundry_modules(x,Path.dirname(y));
 		}
 
@@ -74,19 +74,23 @@ component {
 	private any function load_as_file(x) {
 		var compPath = getCompPath(x);
 		
-		//console.log("load as file: " & x);
-		
+		console.log("load as file: " & x);
+		var xWithCFC = (right(x,4) EQ ".cfc")? x : x & ".cfc";
+		var xWithCFM = (right(x,4) EQ ".cfm" AND right(x,4) EQ ".cfc")? x : replace(x,'.cfc','') & ".cfm";
+
 		if(isFile(x)) {
+			console.log("-----[LOAD_FILE] #x#");
 			return createObject("component",compPath);
-		} else if (isFile(x & ".cfc")) {
+		} else if (isFile(xWithCFC)) {
+			console.log("-----[LOAD_FILE] #xWithCFC#");
 			return createObject("component",compPath);
-		} else if (isFile(x & ".cfm")) {
+		} else if (isFile(xWithCFM)) {
+			console.log("-----[LOAD_FILE] #xWithCFM#");
 			return fileRead(x);
 		}
 	}
 
 	private any function load_as_directory(x) {
-		//console.log("load as directory: " & arguments.x);
 		// 1. If X/foundry.json is a file,
 		//    a. Parse X/foundry.json, and look for "main" field.
 		//    b. let M = X + (json main field)
@@ -94,8 +98,10 @@ component {
 		// 2. If X/index.cfc is a file, load X/index.cfc as JavaScript text.  STOP
 		// 3. If X/index.cfm is a file, load X/index.cfm as binary addon.  STOP
 		var configFile = Path.join(x,"foundry.json");
-		var indexCFCPath = getCompPath(Path.join(x, "/index.cfc"));
+		
+		var indexCFCPath = Path.join(x, "/index.cfc");
 		var indexCfmPath = Path.join(x, "/index.cfm");
+
 		console.log("load_as_directory(#x#)");
 		if(isFile(configFile)) {
 			var configContent = deserializeJson(fileRead(configFile));
@@ -104,12 +110,13 @@ component {
 			var m = Path.resolve(Path.dirname(configFile), config.main);
 			
 			return load_as_file(m);
-		} else if (isFile(indexPath)) {
-			return createObject("component",indexPath);
-		} else if (isFile(x & "/index.cfm")) {
+		} else if (isFile(indexCFCPath)) {
+			return createObject("component",getCompPath(indexCFCPath));
+		} else if (isFile(indexCFMPath)) {
 			return fileRead(indexCfmPath);
+		} else {
+			return false;
 		}
-		
 	}
 
 	private any function load_foundry_modules(x,start) {
@@ -147,15 +154,11 @@ component {
 		var dirs = directoryList(path=currPath,listInfo="name");
 		var foundryPaths = [];
 
-		console.log("===== #currPath#");
-
 		if(rootPath EQ currPath) {
 			root = true;
 		};
 
 		foundryPaths = arrayFilter(dirs,function(x) {
-			console.log("searching: #x#");
-
 			if(x CONTAINS "foundry_modules") {
 				console.log("found: #x#");
 				return true;
@@ -171,8 +174,6 @@ component {
 		}
 	}
 
-
-
 	private string function getCompPath(x) {
 		var cleanPath = replace(Path.normalize(x),".cfc","");
 		var sep = Path.sep();
@@ -185,7 +186,7 @@ component {
 	}
 
 	private boolean function isFile(x) {
-		//console.log("isFile: " & x);
+		console.log("isFile: " & x);
 		
 		if(fileExists(x)) {
 			var fileInfo = getFileInfo(x);

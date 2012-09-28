@@ -1,7 +1,7 @@
 component name="ArrayObj" {
 	public ArrayObj function init(Array ary = []) {
 		this['arr'] = arguments.ary;
-		this['utils'] = createObject("java","org.apache.commons.lang.ArrayUtils");
+		//this['utils'] = createObject("java","org.apache.commons.lang.ArrayUtils");
 
 		return this;
 	}
@@ -10,10 +10,34 @@ component name="ArrayObj" {
 		return arrayLen(this.arr);
 	}
 
-	public array function slice() {
-		var argCount = listLen(structKeyList(arguments));
+	public array function slice(required fromIndex,toIndex = 0) {
+		if(arguments.toIndex EQ 0) {
+			arguments.toIndex = arrayLen(this.arr);
+		}
 		
-		return this.arr.subList();
+		return new arrayObj(this.arr.subList(arguments.fromIndex,arguments.toIndex));
+	}
+
+	public arrayObj function splice(required index,required howMany) {
+		var items = (structCount(arguments) GT 2)? arguments[3] : [];
+		
+		var newArr = createObject("java","java.util.Vector");
+
+		newArr.addAll(this.arr);
+
+		if (index < 1) {
+ 			// negative indices mean position from end of array
+ 			index = arrayLen(newArr) + index;
+ 		}
+
+ 		var result = [];
+ 		var left = newArr.subList(0, index - 1);
+ 		var removedItems = newArr.subList(index-1,(index + howMany)-1);
+ 		var right = newArr.subList((index + howMany)-1,arrayLen(newArr));
+ 		result.addAll(left);
+ 		result.addAll(right);
+ 		this.arr = result;
+ 		return new arrayObj(removedItems);
 	}
 
 	public void function add(str) {

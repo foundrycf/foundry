@@ -24,19 +24,17 @@ component name="fs" {
 		cb(err, contents);
 	}
 
-	public any function mkdir(path, mode = 0777, cb) {
+	public any function mkdir(p, mode = 0777, cb) {
 		var _ = new util();
+		var path = new path();
   		if(_.isFunction(mode)) cb = mode;
   		
   		try{
-  			console.log(path.resolve(expandPath('/'), path));
-  			directoryCreate(path.resolve(expandPath('/'), path));
+  			directoryCreate(path.resolve(expandPath('/'), p));
   		} catch(any err) {
   			cb(err);
   			return false;
   		}
-
-  	    cb(err, contents);
 	}
 
 	// Ensure that callbacks run in the global context. Only use this function
@@ -53,11 +51,41 @@ component name="fs" {
 		};
 	}
 
-	public any function stat(path, cb) {
+	public any function stat(p, cb) {
+		var path = new path();
+		var err = {};
+		var contents = {};
+
 		try {
-			getFileInfo(path.resolve(expandPath('/'), path));
+			currisDir = false;
+			currIsFile = false;
+			fileSize = 0;
+			modePerms = '';
+			tmpContents = getFileInfo(path.resolve(expandPath('/'), p));
+
+			if(tmpContents.canRead && tmpContents.canWrite) {
+				modePerms = 'rw';
+			} else if(tmpContents.canRead && !tmpContents.canWrite) {
+				modePerms = 'r';
+			} else if(tmpContents.canRead && tmpContents.canWrite) {
+				modePerms = 'w';
+			} else {
+				modePerms = '';
+			}
+
+			if(tmpContents.type EQ 'file') {
+				fileSize = createObject("java","java.io.File").init(path.resolve(expandPath('/'), p)).length();
+			}
+
+			contents = {
+				isFile: (tmpContents.type EQ 'file') ? true : false,
+				isDirectory: (tmpContents.type EQ 'directory') ? true : false,
+				mode: modePerms,
+				size: fileSize
+			};
+
 		} catch(any err) {
-			cb(err, contents);
+			cb(err);
 			return false;
 		}
 

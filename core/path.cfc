@@ -507,6 +507,10 @@ component accessors=true {
 		return toString(jpath.separatorsToSystem("/"));
 	}
 
+
+	public any function fixSeps(x) {
+		return toString(jpath.separatorsToSystem(x));
+	}
 	/**
 	* reSplit UDF
 	* @Author Ben Nadel <http://bennadel.com/>

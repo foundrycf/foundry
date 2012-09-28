@@ -11,7 +11,7 @@ component {
 	application['foundry'] = (structKeyExists(application,'foundry'))? application.foundry : {};
 	application.foundry['cache'] = (structKeyExists(application.foundry,'cache'))? application.foundry.cache : {};
 	
-	variables.core_modules = "path,regexp,console,struct,array,util";
+	variables.core_modules = "path,regexp,console,struct,arrayobj,util,fs,emitter,event";
 	variables.Path = new core.Path();
 	
 	//proxy function for init
@@ -27,7 +27,7 @@ component {
 		var _ = new core.util();
 		var isRelative = !Path.isAbsolute(x);
 		var pathSep = Path.getSep();
-		var isPath = (x CONTAINS pathSep);
+		var isPath = (path.fixSeps(x) CONTAINS pathSep);
 		var y = getComponentMetaData(this).path;
 		var fullPath = Path.join(Path.dirname(y),x);
 		var module = {};
@@ -46,11 +46,11 @@ component {
 		} else if (isPath) {
 			console.log("isPath(" & x & " CONTAINS " & pathSep & ") = " & isPath);
 			if(isDir(x)) {
-				//console.log("isDir(#fullPath#)");
+				console.log("isDir(#fullPath#)");
 			
 				module = load_as_directory(x);
 			} else if (isFile(x)) {
-				//console.log("isFile(#fullPath#)");
+				console.log("isFile(#fullPath#)");
 				return load_as_file(x);
 			}
 		} else {
@@ -117,6 +117,7 @@ component {
 		// 	a. LOAD_AS_FILE(DIR/X)
 		// 	b. LOAD_AS_DIRECTORY(DIR/X)
 		var fullPath = "";
+		//writeDump(var=path.relative(start),abort=true);
 		var dirs = foundry_modules_paths(start);
 		for (dir in dirs) {
 			fullPath = Path.join(Path.dirname(start),dir,x);
@@ -130,6 +131,7 @@ component {
 	}
 
 	private any function foundry_modules_paths(start) {
+		writeDump(var=start,abort=true);
 		// 1. let PARTS = path split(START)
 		// 2. let ROOT = index of first instance of "foundry_modules" in PARTS, or 0
 		// 3. let I = count of PARTS - 1

@@ -154,9 +154,9 @@ component name="pathTests" extends="mxunit.framework.testcase" {
 		     [['x', true, 7, 'y', null, {}], 'x/y']
 		    ];
 		joinTests.forEach(function(test) {
-		  var actual = path.join.apply(path, test[0]);
-		  var expected = isWindows ? test[1].replace(/\//g, '\\') : test[1];
-		  var message = 'path.join(' + test[0].map(JSON.stringify).join(',') + ')' +
+		  var actual = path.join.apply(path, test[1]);
+		  var expected = isWindows ? test[2].replace(/\//g, '\\') : test[1];
+		  var message = 'path.join(' + test[1].map(JSON.stringify).join(',') + ')' +
 		                '\n  expect=' + JSON.stringify(expected) +
 		                '\n  actual=' + JSON.stringify(actual);
 		  if (actual !== expected) failures.push('\n' + message);
@@ -211,9 +211,9 @@ component name="pathTests" extends="mxunit.framework.testcase" {
 		}
 		var failures = [];
 		resolveTests.forEach(function(test) {
-		  var actual = path.resolve.apply(path, test[0]);
-		  var expected = test[1];
-		  var message = 'path.resolve(' + test[0].map(JSON.stringify).join(',') + ')' +
+		  var actual = path.resolve.apply(path, test[1]);
+		  var expected = test[2];
+		  var message = 'path.resolve(' + test[1].map(JSON.stringify).join(',') + ')' +
 		                '\n  expect=' + JSON.stringify(expected) +
 		                '\n  actual=' + JSON.stringify(actual);
 		  if (actual !== expected) failures.push('\n' + message);
@@ -249,8 +249,8 @@ component name="pathTests" extends="mxunit.framework.testcase" {
 		}
 		var failures = [];
 		relativeTests.forEach(function(test) {
-		  var actual = path.relative(test[0], test[1]);
-		  var expected = test[2];
+		  var actual = path.relative(test[1], test[2]);
+		  var expected = test[3];
 		  var message = 'path.relative(' +
 		                test.slice(0, 2).map(JSON.stringify).join(',') +
 		                ')' +
@@ -274,7 +274,7 @@ component name="pathTests" extends="mxunit.framework.testcase" {
 		}
 	}
 
-	
+
 	public void function setUp() {
 		//variables.common = require('../common');
 		variables.assert = require('assert');

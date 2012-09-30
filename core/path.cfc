@@ -121,6 +121,7 @@ component accessors=true {
 	* 	@example path.resolve('/foo/bar', './baz')<br />// returns<br />'/foo/bar/baz'<br /><br />path.resolve('/foo/bar', '/tmp/file/')<br />// returns<br />'/tmp/file'<br /><br />path.resolve('wwwroot', 'static_files/png/', '../gif/image.gif')<br />// if currently in /home/myself/node, it returns'/home/myself/node/wwwroot/static_files/gif/image.gif'
 	*/
 	public string function resolve() {
+		var argsArr = structKeyArray(arguments);
     	var resolvedDevice = '';
 	    var resolvedTail = '';
 	    var resolvedPath = "";
@@ -130,20 +131,23 @@ component accessors=true {
 		var isAbsolute = false;
 		var isUnc = false;
 	    if(isWindows) {
+		   for (var i = arrayLen(argsArr); i >= 0 && !resolvedAbsolute; i--) {
+
 		   thePath = "";
-		   for (var i = listLen(structKeyList(arguments)); i >= 1 && !resolvedAbsolute; i--) {
-				      
-		      if (i >= 0) {
-		        thePath = arguments[i];
-		        
+			console.log("====  " & i & "  ====");
+		      if (i >= 1) {
+		      	thePath = arguments[i];
+		        console.log("[PATH] " & thePath);
 		      } else if (_.isEmpty(resolvedDevice)) {
 		        thePath = expandPath('/');
+		      	console.log("[PATH] " & thePath);
 		      } else {
 		        // Windows has the concept of drive-specific current working
 		        // directories. If we've resolved a drive letter but not yet an
 		        // absolute path, get cwd for that drive. We're sure the device is not
 		        // an unc path at this points, because unc paths are always absolute.
 		        thePath = env.get('=' & resolvedDevice);
+		        console.log("[PATH] " & thePath);
 		        // Verify that a drive-local cwd was found and that it actually points
 		        // to our drive. If not, default to the drive's root.
 		        if (_.isEmpty(thePath) || mid(lcase(thePath),1,4) NEQ
@@ -153,7 +157,8 @@ component accessors=true {
 		      }
 
 		      // Skip empty and invalid entries
-		      if (_.isString(thePath) || !_.isEmpty(thePath)) {
+		      if (!_.isString(thePath) || _.isEmpty(thePath)) {
+		      	console.log("invalid");
 		        continue;
 		      }
 
@@ -164,7 +169,7 @@ component accessors=true {
 			var isAbsolute = (!isNull(result[3]) && !_.isEmpty(result[3]))? true : isUnc;
 			var tail = result[4];
 
-			console.log("device: " & device);
+		     console.log("device: " & device);
 			console.log("unc: " & isUnc);
 			console.log("absolute: " & isAbsolute);
 			console.log("tail: " & tail);
@@ -172,41 +177,51 @@ component accessors=true {
 			if (!_.isEmpty(device) &&
 			  !_.isEmpty(resolvedDevice) &&
 			  lcase(device) NEQ lcase(resolvedDevice)) {
-			// This thePath points to another device so it is not applicable
+			// This path points to another device so it is not applicable
+				console.log("this path points to another device so it is not applicable");
 			continue;
 			}
 
 			if (_.isEmpty(resolvedDevice)) {
-			resolvedDevice = device;
+				console.log("resolvedDevice is empty, setting to device: '#device#'")
+				resolvedDevice = device;
 			}
+
 			if (!resolvedAbsolute) {
 			resolvedTail = tail & '\' & resolvedTail;
 			resolvedAbsolute = isAbsolute;
+				console.log("not resolvedAbsolute, setting resolvedTail = #resolvedTail# and resolvedAbsolute is #resolvedAbsolute#");
 			}
 
-			if (resolvedDevice && resolvedAbsolute) {
-			break;
+			if (!_.isEmpty(resolvedDevice) && resolvedAbsolute) {
+				console.log("resolvedDevice is #resolvedDevice#, and resolvedAbs = #resolvedAbsolute#");
+				break;
 			}
 }
+			console.log("out of LOOP now");
+			console.log("resolvedDevice = #resolvedDevice#");
 			// Replace slashes (in UNC share name) by backslashes
 			resolvedDevice = rereplace(resolvedDevice,"\/",'\',"ALL");
-
+			console.log("resolvedDevice is now #resolvedDevice#");
 			// At this point the path should be resolved to a full absolute path,
 			// but handle relative paths to be safe (might happen when process.cwd()
 			// fails)
 
 			//Normalize the tail path
-			resolvedTail = listToArray(tail,"\");
-			console.log(tail);
+			console.log("resolvedTail = #resolvedTail#");
+			resolvedTail = listToArray(fixSeps(resolvedTail),"\");
+			console.log(resolvedTail);
 			//filter array
 			ArrayFilter(resolvedTail,function(p) {
 				return !_.isEmpty(p);
 			});
 
 			resolvedTail = normalizeArray(resolvedTail,(!isAbsolute));
+			console.log(resolvedTail);
+			//writeDump(var=resolvedTail,abort=true);
 			//convert it back to a string
 			resolvedTail = arrayToList(resolvedTail,"\");
-			finalPath = ((!_.isEmpty(resolvedDevice) & resolvedAbsolute)? '\' : '') & resolvedTail;
+			finalPath = resolvedDevice & ((  resolvedAbsolute)? '\' : '') & resolvedTail;
 			return (!_.isEmpty(finalPath))? finalPath : '.';
 	    } else {
 	    		for (var i = listLen(structKeyList(arguments)); i >= 1 && !resolvedAbsolute; i--) {

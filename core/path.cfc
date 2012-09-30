@@ -7,21 +7,22 @@ component accessors=true {
 	property name="sep"
 	type="string";
 	
-	variables.isWindows = (server.os.name EQ "Windows");
-	variables._ = new util();
-	variables.jPath = createObject("java","org.apache.commons.io.FilenameUtils");
-	variables.jRegex = createObject("java","java.util.regex.Pattern");
-	variables.jArrayUtils = createObject("java","org.apache.commons.lang.ArrayUtils");
-	
-	//windows regex
-	variables.splitDeviceRe = "^([\s\S]+[\\\/](?!$)|[\\\/])?((?:\.{1,2}$|[\s\S]+?)?(\.[^.\/\\]*)?)$";
-	variables.splitTailRe = "^([\s\S]+[\\\/](?!$)|[\\\/])?((?:\.{1,2}$|[\s\S]+?)?(\.[^.\/\\]*)?)$";
-	
-	//posix regex
-	variables.splitPathRe = "^(\/?)([\s\S]+\/(?!$)|\/)?((?:\.{1,2}$|[\s\S]+?)?(\.[^.\/]*)?)$";
 
 	public function init() {
+		variables.isWindows = (server.os.name CONTAINS "windows");
+		variables._ = new util();
+		variables.jPath = createObject("java","org.apache.commons.io.FilenameUtils");
+		variables.jRegex = createObject("java","java.util.regex.Pattern");
+		variables.jArrayUtils = createObject("java","org.apache.commons.lang.ArrayUtils");
+		var system = CreateObject("java", "java.lang.System");
+		variables.env = system.getenv();
+		variables.console = new core.console();
+		//windows regex
+		variables.splitDeviceRe = new core.RegExp("^([a-zA-Z]:|[\\/]{2}[^\\\/]+[\\\/][^\\\/]+)?([\\\/])?([\s\S]*?)$");
+		variables.splitTailRe = new core.RegExp("^([\s\S]+[\\\/](?!$)|[\\\/])?((?:\.{1,2}$|[\s\S]+?)?(\.[^.\/\\]*)?)$");
 		
+		//posix regex
+		variables.splitPathRe = new core.RegExp("^(\/?)([\s\S]+\/(?!$)|\/)?((?:\.{1,2}$|[\s\S]+?)?(\.[^.\/]*)?)$");
 		
 		this.setSep(sep());
 		return this;
@@ -39,80 +40,43 @@ component accessors=true {
 		//windows
 		if(isWindows) {
 	       	//split the path to array
-			var result = ReMatchGroups(thePath,splitDeviceRe);
-			var device = (result[1] || '');
-			var isUnc = (device && charAt(device,1) != ':');
-			var isAbsolute = !_.isEmpty(result[2]) || isUnc;
-	        var tail = result[3];
-			var trailingSlash = (arrayLen(reMatch("[\\\/]$",tail)) GT 0);
+			var result = splitDeviceRe.match(thePath);
+			var device = (!isNull(result[2]) && !_.isEmpty(result[2])? result[2] : '');
+			var isUnc = (!_.isEmpty(device) && charAt(device,2) NEQ ':');
+			var isAbsolute = (!isNull(result[3]) && !_.isEmpty(result[3]))? true : isUnc;
+	        var tail = result[4];
+	        var tester = new RegExp("[\\\/]$");
+			var trailingSlash = tester.test(tail);
+
 			
 			//Normalize the tail path
 			tailSplit = listToArray(tail,"\");
+
 			//filter array
 			ArrayFilter(tailSplit,function(p) {
-				return !_.isEmpty(arguments.p);
+				return !_.isEmpty(p);
 			});
-
-			//normalize array
-			tailSplit = normalizeArray(tailSplit, !isAbsolute);
+			
+			tailSplit = normalizeArray(tailSplit,(!isAbsolute));
 
 			//convert it back to a string
 			tail = arrayToList(tailSplit,"\");
-
-			if (_.isEmpty("tail") AND !isAbsolute) {
+			if (_.isEmpty(tail) AND !isAbsolute) {
 				tail = ".";
 			}
 
-			if (!_.isEmpty("tail") AND trailingSlash) {
+			if (!_.isEmpty(tail) AND trailingSlash) {
 				tail &= "\";
 			}
+			//convert slashes to backslashes when 'device' points to a UNC root.
+			device = rereplace(device,"\/",'\\',"ALL");
 
-			device = rereplace("\/",device,'\\',"ALL");
+			//writeDump(var=device,abort=true);
+			return device & (isAbsolute ? '\' : '') & tail;
 
-			return device & (isAbsolute ? '\\' : '') & tail;
-
-			// var result = splitDeviceRe.exec(path),
-			//        device = result[1] || '',
-			//        isUnc = device && device.charAt(1) !== ':',
-			//        isAbsolute = !!result[2] || isUnc, // UNC paths are always absolute
-			//        tail = result[3],
-			//        trailingSlash = /[\\\/]$/.test(tail);
-
-			//    // Normalize the tail path
-			//    tail = normalizeArray(tail.split(/[\\\/]+/).filter(function(p) {
-			//      return !!p;
-			//    }), !isAbsolute).join('\\');
-
-			//    if (!tail && !isAbsolute) {
-			//      tail = '.';
-			//    }
-			//    if (tail && trailingSlash) {
-			//      tail += '\\';
-			//    }
-
-			//    // Convert slashes to backslashes when `device` points to an UNC root.
-			//    device = device.replace(/\//g, '\\');
-
-			//    return device + (isAbsolute ? '\\' : '') + tail;
 		//posix
 		} else {
-			// var isAbsolute = path.charAt(0) === '/',
-			//     trailingSlash = path.substr(-1) === '/';
-
-			//    // Normalize the path
-			//    path = normalizeArray(path.split('/').filter(function(p) {
-			//      return !!p;
-			//    }), !isAbsolute).join('/');
-
-			//    if (!path && !isAbsolute) {
-			//      path = '.';
-			//    }
-			//    if (path && trailingSlash) {
-			//      path += '/';
-			//    }
-
-			//    return (isAbsolute ? '/' : '') + path;
-
+			
 		    var isAbsolute = left(thePath,1) EQ "/";
 	        var trailingSlash = right(thePath,1) EQ "/";
 			
@@ -162,58 +126,88 @@ component accessors=true {
 	    var resolvedPath = "";
 	    var resolvedAbsolute = false;
 		var thePath = "";
+		var tail = "";
+		var isAbsolute = false;
+		var isUnc = false;
 	    if(isWindows) {
-		    for (var i = listLen(structKeyList(arguments),","); i >= 1 && !resolvedAbsolute; i--) {
-			  thePath = "";
-
+		   thePath = "";
+		   for (var i = listLen(structKeyList(arguments)); i >= 1 && !resolvedAbsolute; i--) {
+				      
 		      if (i >= 0) {
 		        thePath = arguments[i];
-		      } else if (!resolvedDevice) {
-		        thePath = expandPath("/");
+		        
+		      } else if (_.isEmpty(resolvedDevice)) {
+		        thePath = expandPath('/');
 		      } else {
 		        // Windows has the concept of drive-specific current working
 		        // directories. If we've resolved a drive letter but not yet an
-		        // absolute thePath, get cwd for that drive. We're sure the device is not
-		        // an unc thePath at this points, because unc thePaths are always absolute.
-		        thePath = expandPath(resolvedDevice);
+		        // absolute path, get cwd for that drive. We're sure the device is not
+		        // an unc path at this points, because unc paths are always absolute.
+		        thePath = env.get('=' & resolvedDevice);
 		        // Verify that a drive-local cwd was found and that it actually points
 		        // to our drive. If not, default to the drive's root.
-		        if (!thePath || LCase(left(thePath,3)) NEQ LCase(resolvedDevice & '\')) {
-		          thePath = resolvedDevice + '\';
+		        if (_.isEmpty(thePath) || mid(lcase(thePath),1,4) NEQ
+		            lcase(resolvedDevice) & '\') {
+		          thePath = resolvedDevice & '\';
 		        }
 		      }
 
 		      // Skip empty and invalid entries
-		      if (!_.isString(thePath) || _.isEmpty(thePath)) {
+		      if (_.isString(thePath) || !_.isEmpty(thePath)) {
 		        continue;
 		      }
 
-		      //split the thePath to array
-				var result = ReMatchGroups(thePath,splitDeviceRe);
-				var device = (result[1] || '');
-				var isUnc = (device && charAt(device,1) != ':');
-				var isAbsolute = !_.isEmpty(result[2]) || isUnc;
-		        var tail = result[3];
-				
-		      if (!_.isEmpty(device) &&
-		          !_.isEmpty(resolvedDevice) &&
-		          lcase(device) NEQ LCase(resolvedDevice)) {
-		        // This thePath points to another device so it is not applicable
-		        continue;
-		      }	
+			//split the path to array
+			var result = splitDeviceRe.match(thePath);
+			var device = (!isNull(result[2]) && !_.isEmpty(result[2])? result[2] : '');
+			var isUnc = (!_.isEmpty(device) && charAt(device,2) NEQ ':');
+			var isAbsolute = (!isNull(result[3]) && !_.isEmpty(result[3]))? true : isUnc;
+			var tail = result[4];
 
-		      if (_.isEmpty(resolvedDevice)) {
-		        resolvedDevice = device;
-		      }
-		      if (_.isEmpty(resolvedAbsolute)) {
-		        resolvedTail = tail & '\' & resolvedTail;
-		        resolvedAbsolute = isAbsolute;
-		      }
+			console.log("device: " & device);
+			console.log("unc: " & isUnc);
+			console.log("absolute: " & isAbsolute);
+			console.log("tail: " & tail);
 
-		      if (resolvedDevice && resolvedAbsolute) {
-		        break;
-		      }
-		     }
+			if (!_.isEmpty(device) &&
+			  !_.isEmpty(resolvedDevice) &&
+			  lcase(device) NEQ lcase(resolvedDevice)) {
+			// This thePath points to another device so it is not applicable
+			continue;
+			}
+
+			if (_.isEmpty(resolvedDevice)) {
+			resolvedDevice = device;
+			}
+			if (!resolvedAbsolute) {
+			resolvedTail = tail & '\' & resolvedTail;
+			resolvedAbsolute = isAbsolute;
+			}
+
+			if (resolvedDevice && resolvedAbsolute) {
+			break;
+			}
+}
+			// Replace slashes (in UNC share name) by backslashes
+			resolvedDevice = rereplace(resolvedDevice,"\/",'\',"ALL");
+
+			// At this point the path should be resolved to a full absolute path,
+			// but handle relative paths to be safe (might happen when process.cwd()
+			// fails)
+
+			//Normalize the tail path
+			resolvedTail = listToArray(tail,"\");
+			console.log(tail);
+			//filter array
+			ArrayFilter(resolvedTail,function(p) {
+				return !_.isEmpty(p);
+			});
+
+			resolvedTail = normalizeArray(resolvedTail,(!isAbsolute));
+			//convert it back to a string
+			resolvedTail = arrayToList(resolvedTail,"\");
+			finalPath = ((!_.isEmpty(resolvedDevice) & resolvedAbsolute)? '\' : '') & resolvedTail;
+			return (!_.isEmpty(finalPath))? finalPath : '.';
 	    } else {
 	    		for (var i = listLen(structKeyList(arguments)); i >= 1 && !resolvedAbsolute; i--) {
 			      thePath = (i >= 1) ? arguments[i] : expandPath("/");
@@ -251,19 +245,29 @@ component accessors=true {
 		var argArr = structKeyArray(arguments);
 		arraySort(argArr,"numeric","asc");
 		var paths = [];
+		for (arg in argArr) {
+			paths.add(arguments[arg]);
+		}
+		//filter out empty strings
+		paths = arrayFilter(paths,function(p) {
+			return (_.isString(arguments.p) AND !_.isEmpty(arguments.p));
+		});
 
 		if(isWindows) {
+		    var joined = arrayToList(paths,'\');
+		    var tester = new RegExp("^[\\/]{2}");
+		    // Make sure that the joined path doesn't start with two slashes
+		    // - it will be mistaken for an unc path by normalize() -
+		    // unless the paths[0] also starts with two slashes
+		    if (tester.test(joined) && !tester.test(paths[1])) {
+		      joined = right(joined,len(joined)-1);
+		    }
 
+		    //thePath = arrayToList(paths,"/");
+		    joined = normalize(joined);
+
+		    return joined;
 		} else {
-			paths = [];
-			for (arg in argArr) {
-				paths.add(arguments[arg]);
-			}
-			//filter out empty strings
-			paths = arrayFilter(paths,function(p) {
-				return (_.isString(arguments.p) AND !_.isEmpty(arguments.p));
-			});
-
 			thePath = ArrayToList(paths,"/");
 
 			//normalize]
@@ -377,25 +381,26 @@ component accessors=true {
 
 		//windows only
 		if (isWindows) {
-			result = ReMatchGroups(arguments.filename,splitDeviceRe);
-				device = ((structKeyExists(result,'1') && !_.isEmpty(result['1']))? result['1'] : '') & ((structKeyExists(result,'2') && !_.isEmpty(result['2']))? result['2'] : '');
-				tail = ((structKeyExists(result,'3') && !_.isEmpty(result['4']))? result['3'] : '');
+			result = splitDeviceRe.match(arguments.filename);
+				device = (!isNull(result[2])? result[2] : '') & ((!isNull(result[3]))? result[3] : '');
+				tail = ((!isNull(result[4]))? result[4] : '');
 			
-			result2 = ReMatchGroups(tail);
-				dir = ((structKeyExists(result2,'1') && !_.isEmpty(result2['1']))? result2['1'] : '');
-				basename = ((structKeyExists(result2,'2') && !_.isEmpty(result2['2']))? result2['2'] : '');
-				ext = ((structKeyExists(result2,'3') && !_.isEmpty(result2['3']))? result2['3'] : '');
+			result2 = splitTailRe.match(tail);
+				dir = ((!isNull(result2[2]))? result2[2] : '');
+				basename = ((!isNull(result2[3]))? result2[3] : '');
+				ext = ((!isNull(result2[4]))? result2[4] : '');
 
+			//writeDump(var=result,abort=true);
 		//posix only
 		} else {
-
-			result = ReMatchGroups(arguments.filename,splitPathRe);
-			device = ((structKeyExists(result,'1') && !_.isEmpty(result['1']))? result['1'] : '');
-			dir = ((structKeyExists(result,'2') && !_.isEmpty(result['2']))? result['2'] : '');
-			basename = ((structKeyExists(result,'3') && !_.isEmpty(result['3']))? result['3'] : '');
-			ext = ((structKeyExists(result,'4') && !_.isEmpty(result['4']))? result['4'] : '');
+			result = splitPathRe.match(arguments.filename);
+			device = (!isNull(result[1])? result[1] : '');
+			dir = ((!isNull(result[2]))? result[2] : '');
+			basename = ((!isNull(result[3]))? result[3] : '');
+			ext = ((!isNull(result[4]))? result[4] : '');
 		};
 
+		writeDump(var=[device,dir,basename,ext]);
 		return [device,dir,basename,ext];
 	}
 
@@ -437,12 +442,12 @@ component accessors=true {
 	    }
 	  }
 	  // if the path is allowed to go above the root, restore leading ..s
-	  if (allowAboveRoot) {
+	 if (allowAboveRoot) {
 	    for (; up--; up) {
 	    	unshift(theParts,'..');
 	    }
 	  }
-
+	  
 	  return theParts;
 	}
 
@@ -458,7 +463,9 @@ component accessors=true {
 
 		if (!_.isEmpty(dir)) {
 			// It has a dirname, strip trailing slash
+			if(len(dir) GT 1) {
 			dir = left(dir,len(dir)-1);
+			}
 		}
 		
 		return root & dir;
@@ -467,7 +474,6 @@ component accessors=true {
 	public any function basename(path, ext = "") {
 		var f = splitPath(arguments.path)[3];
 		var theExt = arguments.ext;
-
 		if(!_.isEmpty(theext) AND right(f,len(theExt)) EQ theExt) {
 			f = left(f,len(f) - len(theExt));
 		}
@@ -532,58 +538,5 @@ component accessors=true {
 		return local.result;
 	}
 
-	/**
-	* REMatchGroups UDF
-	* @Author Ben Nadel <http://bennadel.com/>
-	*/
-	private struct function REMatchGroups(text,pattern,scope = "all") {
-		var local = structnew();
-		local.results = {};
-		local.pattern =createobject( "java", "java.util.regex.Pattern" ).compile( javacast( "string", arguments.pattern ) );
-		
-		local.matcher =local.pattern.matcher( javacast( "string", arguments.text ) );
-		
-		while (local.Matcher.Find()) {
-			local.groups =structnew();
-			
-			for(local.GroupIndex=0; local.GroupIndex <= local.Matcher.GroupCount();LOCAL.GroupIndex++) {
-				local.results[local.groupindex] = (local.matcher.group( javacast( "int", local.groupindex ) ));
-			}
-			
-			//arrayappend( local.results, local.groups )
-			
-			if(arguments.scope EQ "one") {
-				break;
-			}
-			
-		}
-
-		return local.results;
-	}
-
-	/**
-	 * Slices an array.
-	 * 
-	 * @param ary      The array to slice. (Required)
-	 * @param start      The index to start with. Defaults to 1. (Optional)
-	 * @param finish      The index to end with. Defaults to the end of the array. (Optional)
-	 * @return Returns an array. 
-	 * @author Darrell Maples (drmaples@gmail.com) 
-	 * @version 1, July 13, 2005 
-	 */
-	// function arraySlice(ary) {
-	//     var start = 1;
-	//     var finish = arrayLen(ary);
-	//     var slice = arrayNew(1);
-	//     var j = 1;
-
-	//     if (len(arguments[2])) { start = arguments[2]; };
-	//     if (len(arguments[3])) { finish = arguments[3]; };
-
-	//     for (j=start; j LTE finish; j=j+1) {
-	//         arrayAppend(slice, ary[j]);
-	//     }
-	//     return slice;
-	// }
 	
 }

@@ -1,6 +1,12 @@
 component name="fs" {
 	variables.console = new Console();
 
+	// public void function assertEncoding(encoding) {
+	// 	if (structKeyExists(arguments, 'encoding' && !Buffer.isEncoding(encoding)) {
+	// 		throw new Error('Unknown encoding: ' & encoding);
+	// 	}
+	// }
+
 	public any function exists(p,cb) {
 		if(fileExists(arguments.p)) {
 			exists = true;
@@ -46,48 +52,71 @@ component name="fs" {
 	// for callbacks that are passed to the binding layer, callbacks that are
 	// invoked from JS already run in the proper scope.
 	private any function makeCallback(cb) {
-		if (!isFunction(cb)) {
+		var _ = new util().init();
+
+		if (!_.isFunction(cb)) {
 		    // faster than returning a ref to a global no-op function
 		    return function() {};
 		}
 
 		return function() {
-			return cb.apply(null, arguments);
+			return cb(argumentCollection=arguments);
 		};
+	}
+
+	private any function modeNum(m, def) {
+		var _ = new util().init();
+
+		if(isNumeric(m)) {
+			return m;
+		} else if(_.isString(m)) {
+			return FormatBaseN(LSParseNumber(mode), 8);
+		} else {
+			if(def) {
+				return modeNum(def);
+			} else {
+				return 'undefined';
+			}
+		}
+	}
+
+	public any function open(p, flags, mode, callback) {
+		callback = makeCallback(callback);
+		//mode = modeNum(mode, '438 /*=0666*/');
+		path = new path();
+		openedFile = fileOpen(path.resolve(expandPath('/'), p), 'readwrite');
+		
+		callback("", openedFile);
 	}
 
 	public any function stat(p, cb) {
 		var path = new path();
 		var err = {};
-		var contents = {};
+		var contents = {
+				isFile: false,
+				isDirectory: false,
+				mode: '',
+				size: 0 };
 
 		try {
-			currisDir = false;
-			currIsFile = false;
-			fileSize = 0;
-			modePerms = '';
 			tmpContents = getFileInfo(path.resolve(expandPath('/'), p));
 
 			if(tmpContents.canRead && tmpContents.canWrite) {
-				modePerms = 'rw';
+				contents.mode = 'rw';
 			} else if(tmpContents.canRead && !tmpContents.canWrite) {
-				modePerms = 'r';
+				contents.mode = 'r';
 			} else if(tmpContents.canRead && tmpContents.canWrite) {
-				modePerms = 'w';
+				contents.mode = 'w';
 			} else {
-				modePerms = '';
+				contents.mode = '';
 			}
 
 			if(tmpContents.type EQ 'file') {
-				fileSize = createObject("java","java.io.File").init(path.resolve(expandPath('/'), p)).length();
+				contents.size = createObject("java","java.io.File").init(path.resolve(expandPath('/'), p)).length();
 			}
 
-			contents = {
-				isFile: (tmpContents.type EQ 'file') ? true : false,
-				isDirectory: (tmpContents.type EQ 'directory') ? true : false,
-				mode: modePerms,
-				size: fileSize
-			};
+			contents.isFile = (tmpContents.type EQ 'file') ? true : false;
+			contents.isDirectory = (tmpContents.type EQ 'directory') ? true : false;
 
 		} catch(any err) {
 			cb(err, contents);
@@ -100,4 +129,68 @@ component name="fs" {
 	public any function statSync(path) {
 		return stat(path);
 	}
+
+	function writeAll(fd, buffer, offset, length, position, cb) {
+		var _ = new util().init();
+		var noop = function() {};
+		var callback_ = (_.isFunction(cb)) ? cb : noop;
+
+		fs.write(fd, buffer, offset, length, position, function(writeErr, written) {
+			if (structKeyExists(arguments, 'writeErr')) {
+				fs.close(fd, function() {
+					if (_.isEmpty(callback_)) callback_(writeErr);
+				});
+
+			} else {
+				if (structKeyExists(arguments, 'written') && written === length) {
+					fs.close(fd, callback);
+	
+				} else {
+					offset += written;
+					length -= written;
+					position += written;
+					
+					writeAll(fd, buffer, offset, length, position, callback);
+				}
+			}
+		});
+	}
+
+	public any function writeFile(path, data, encoding_, cb) {
+		var _ = new util().init();
+  		var encoding = (structKeyExists(arguments,'encoding_') && _.isString(encoding_)) ? encoding_ : 'utf8';
+  		//assertEncoding(encoding);
+	    var noop = function() {};
+  		var callback_ = (structKeyExists(arguments, 'cb') && _.isFunction(cb)) ? cb : noop;
+  
+  		open(path, 'w', 438 /*=0666*/, function(openErr, fd) {
+    		if (structKeyExists(arguments, 'openErr') && !_.isEmpty(openErr)) {
+      			if(_.isFunction(callback_)) callback_(openErr);
+			} else {
+      			//var buffer = Buffer.isBuffer(data) ? data : new Buffer('' + data, encoding);
+      			writeAll(fd, buffer, 0, buffer.length, 0, callback);
+    		}
+  		});
+
+
+	}
+
+	// public any function writeFileSync(path, data, encoding) {
+ //  		assertEncoding(encoding);
+
+ //  		var fd = fs.openSync(path, 'w');
+	// 	if (!Buffer.isBuffer(data)) {
+	// 		data = new Buffer('' + data, encoding || 'utf8');
+	// 	}
+
+	// 	var written = 0;
+	// 	var length = data.length;
+	// 	try {
+	// 		while (written < length) {
+	// 			written += fs.writeSync(fd, data, written, length - written, written);
+	// 		}
+	// 	} finally {
+	// 		fs.closeSync(fd);
+	// 	}
+	// };
 }

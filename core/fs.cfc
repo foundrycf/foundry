@@ -11,6 +11,14 @@ component name="fs" {
 		cb(exists);
 	}
 
+	public any function existsSync(p) {
+		if(fileExists(arguments.p)) {
+			return true;
+		}
+
+		return false;
+	}
+
 	public any function readFile(p,charset = 'utf8',cb) {
 		var err = {};
 		var contents = "";
@@ -42,11 +50,22 @@ component name="fs" {
   		cb({});
 	}
 
+	public any function rmdir(path,callback) {
+		thread name="foundry-rmdir-#createUUID#" action="run" p=arguments.path cb=arguments.callback {
+			deleteDirectory(path);
+			makeCallback(callback);
+		}
+	}
+
+	public any function rmdirSync(path,callback) {
+		deleteDirectory(path);
+	}
+
 	// Ensure that callbacks run in the global context. Only use this function
 	// for callbacks that are passed to the binding layer, callbacks that are
 	// invoked from JS already run in the proper scope.
 	private any function makeCallback(cb) {
-		if (!isFunction(cb)) {
+		if (!_.isFunction(cb)) {
 		    // faster than returning a ref to a global no-op function
 		    return function() {};
 		}
@@ -103,5 +122,7 @@ component name="fs" {
 	public any function createWriteStream(path) {
 		var File = createObject("java","java.io.File").init(path);
 		var FileWriter = createObject("java","java.io.FileWriter").init(File);
+
+		return FileWriter;
 	}
 }

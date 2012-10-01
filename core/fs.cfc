@@ -27,14 +27,19 @@ component name="fs" {
 	public any function mkdir(p, mode = 0777, cb) {
 		var _ = new util();
 		var path = new path();
+  		var err = {};
+
   		if(_.isFunction(mode)) cb = mode;
   		
   		try{
-  			directoryCreate(path.resolve(expandPath('/'), p));
-  		} catch(any err) {
+  			directoryCreate(path=path.resolve(expandPath('/'), p));
+  			FileSetAccessMode(path.resolve(expandPath('/'), p), mode);
+  		} catch(any err1) {
   			cb(err);
   			return false;
   		}
+
+  		cb({});
 	}
 
 	// Ensure that callbacks run in the global context. Only use this function
@@ -85,7 +90,7 @@ component name="fs" {
 			};
 
 		} catch(any err) {
-			cb(err);
+			cb(err, contents);
 			return false;
 		}
 

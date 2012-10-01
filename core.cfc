@@ -11,7 +11,7 @@ component {
 	application['foundry'] = (structKeyExists(application,'foundry'))? application.foundry : {};
 	application.foundry['cache'] = (structKeyExists(application.foundry,'cache'))? application.foundry.cache : {};
 	
-	variables.core_modules = "path,regexp,console,struct,arrayobj,util,fs,emitter,event";
+	variables.core_modules = "path,regexp,console,process,struct,arrayobj,util,url,fs,emitter,event";
 	variables.Path = new core.Path();
 	variables._ = new core.util();
 	

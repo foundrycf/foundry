@@ -86,13 +86,17 @@ component name="fs" {
 
 		} catch(any err) {
 			cb(err);
-			return false;
 		}
-
+		
 		cb(err, contents);
 	}
 
 	public any function statSync(path) {
 		return stat(path);
+	}
+
+	public any function createWriteStream(path) {
+		var File = createObject("java","java.io.File").init(path);
+		var FileWriter = createObject("java","java.io.FileWriter").init(File);
 	}
 }

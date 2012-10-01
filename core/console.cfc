@@ -4,20 +4,8 @@
 *
 */
 component {
+	variables.System = createObject("java","java.lang.System");
 	public any function init(opts = {}) {
-		variables.logManager = createObject("java","java.util.logging.LogManager");
-		// variables.ansi = createObject("java","jlibs.core.lang.Ansi");
-		// variables.ansiFormatter = createObject("java","jlibs.core.util.logging.AnsiFormatter");
-		// ;
-		variables.System = createObject("java","java.lang.System");
-		// variables.logger = LogManager.getLogManager().getLogger("");
-		// variables.level = createObject("java","java.util.logging.Level");
-		
-		// logger.setLevel(level.FINEST);
-
-		// variables.handler = logger.getHandlers()[1];
-		// handler.setLevel(level.FINEST);
-		// handler.setFormatter(AnsiFormatter.init());
 		
 		return this;
 	}

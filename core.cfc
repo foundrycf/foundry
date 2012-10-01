@@ -24,7 +24,13 @@ component {
 
 	public any function require(x){
 		var Path = new core.Path();
-		variables.console = new core.Console();
+		var debug = false;
+		if(debug) {
+			variables.console = new core.Console();
+		} else {
+			variables.console =  {};
+			variables.console.log = function() { return true; };
+		}
 		var cleanPath = Path.normalize(x);
 		var parts = Path.splitPath(x);
 		var isRelative = !Path.isAbsolute(x);

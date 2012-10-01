@@ -43,6 +43,9 @@ component {
 		return System.out.println("WARN: " & obj);
 	}
 
+	public any function print(str) {
+		return System.out.println(str);
+	}
 	private any function removeHTML(source){
 		
 		// Remove all spaces becuase browsers ignore them

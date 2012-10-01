@@ -204,16 +204,17 @@ component name="pathTests" extends="mxunit.framework.testcase" {
 		       [['c:/ignore', 'd:\a/b\c/d', '\e.exe'], 'd:\e.exe'],
 		       [['c:/ignore', 'c:/some/file'], 'c:\some\file'],
 		       [['d:/ignore', 'd:some/dir//'], 'd:\ignore\some\dir'],
-		       [['.'], getCurrentTemplatePath()],
+		       [['.'], cwd],
 		       [['//server/share', '..', 'relative\'], '\\server\share\relative']];
 		} else {
 		  // Posix
 		  var resolveTests =
 		      // arguments                                    result
-		      [[['/var/lib', '../', 'file/'], '/var/file'],
+		      [[['a/b/c/', '../../..'], cwd],
+		      	[['/var/lib', '../', 'file/'], '/var/file'],
 		       [['/var/lib', '/../', 'file/'], '/file'],
-		       [['a/b/c/', '../../..'], process.cwd()],
-		       [['.'], process.cwd()],
+		       
+		       [['.'], cwd],
 		       [['/some/dir', '.', '/absolute/'], '/absolute']];
 		}
 		var failures = [];
@@ -224,7 +225,7 @@ component name="pathTests" extends="mxunit.framework.testcase" {
 		                '<br />  expect=' & serialize(expected) &
 		                '<br />  actual=' & serialize(actual);
 		  if (actual NEQ expected) failures.add('<br />' & message);
-		//assertEquals( message,actual, expected);
+		assertEquals(expected, actual, message);
 		});
 		assertEquals(0,arrayLen(failures),arrayToList(failures,''));
 	}
@@ -286,6 +287,7 @@ component name="pathTests" extends="mxunit.framework.testcase" {
 		variables.f = "test-path.cfc";
 		//variables.common = require('../common');
 		//variables.assert = require('assert');
+		variables.cwd = left(expandPath('/'),len(expandPath('/'))-1);
 		variables._ = new core.util();
 		variables.console = new core.console();
 		variables.path = new core.path();
@@ -293,9 +295,11 @@ component name="pathTests" extends="mxunit.framework.testcase" {
 		variables.isWindows = (server.os.name CONTAINS 'windows');
 
 		//variables.f = __filename;
+		console.log("===================");
 	}
 	
 	public void function tearDown() {
+		console.log("===================");
 
 	}
 	

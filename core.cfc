@@ -65,7 +65,7 @@ component {
 			module = load_foundry_modules(x,Path.dirname(y));
 		}
 
-		if(!isObject(module)) {
+		if(!isDefined("module")) {
 			throw(errorCode="fdry001",type="foundry.no_module",message="Foundry module '#x#' not found.");	
 		}
 

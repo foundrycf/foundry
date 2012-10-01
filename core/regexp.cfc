@@ -58,16 +58,15 @@ component name="RegExp" accessors=true {
 			local.groups = structnew();
 			
 			for(local.GroupIndex=0; local.GroupIndex <= local.Matcher.GroupCount();LOCAL.GroupIndex++) {
+				LOCAL.Groups[ LOCAL.GroupIndex ] = LOCAL.Matcher.Group(JavaCast( "int", LOCAL.GroupIndex ));
 				local.results.add(local.matcher.group(javacast( "int", local.groupindex )));
 			}
-			
 			if(arguments.scope EQ "one") {
 				break;
 			}
 			
 		}
-
-		return local.results;
+		return LOCAL.Groups;
 	}
 
 	public any function replace(text,replacement) {

@@ -7,26 +7,23 @@ component accessors=true {
 	property name="sep"
 	type="string";
 	
-
-	public function init() {
-		variables.isWindows = (server.os.name CONTAINS "windows");
-		variables._ = new util();
-		variables.jPath = createObject("java","org.apache.commons.io.FilenameUtils");
-		variables.jRegex = createObject("java","java.util.regex.Pattern");
-		variables.jArrayUtils = createObject("java","org.apache.commons.lang.ArrayUtils");
-		var system = CreateObject("java", "java.lang.System");
-		variables.env = system.getenv();
-		variables.console = new console();
-		//windows regex
-		variables.splitDeviceRe = new RegExp("^([a-zA-Z]:|[\\/]{2}[^\\\/]+[\\\/][^\\\/]+)?([\\\/])?([\s\S]*?)$");
-		variables.splitTailRe = new RegExp("^([\s\S]+[\\\/](?!$)|[\\\/])?((?:\.{1,2}$|[\s\S]+?)?(\.[^.\/\\]*)?)$");
-		
-		//posix regex
-		variables.splitPathRe = new RegExp("^(\/?)([\s\S]+\/(?!$)|\/)?((?:\.{1,2}$|[\s\S]+?)?(\.[^.\/]*)?)$");
-		
-		this.setSep(sep());
-		return this;
-	}
+	variables.isWindows = (server.os.name CONTAINS "windows");
+	variables._ = new util();
+	variables.jPath = createObject("java","org.apache.commons.io.FilenameUtils");
+	variables.jRegex = createObject("java","java.util.regex.Pattern");
+	variables.jArrayUtils = createObject("java","org.apache.commons.lang.ArrayUtils");
+	variables.system = CreateObject("java", "java.lang.System");
+	variables.env = system.getenv();
+	variables.console = new console();
+	//windows regex
+	variables.splitDeviceRe = new RegExp("^([a-zA-Z]:|[\\/]{2}[^\\\/]+[\\\/][^\\\/]+)?([\\\/])?([\s\S]*?)$");
+	variables.splitTailRe = new RegExp("^([\s\S]+[\\\/](?!$)|[\\\/])?((?:\.{1,2}$|[\s\S]+?)?(\.[^.\/\\]*)?)$");
+	
+	//posix regex
+	variables.splitPathRe = new RegExp("^(\/?)([\s\S]+\/(?!$)|\/)?((?:\.{1,2}$|[\s\S]+?)?(\.[^.\/]*)?)$");
+	
+	this.setSep(sep());
+	return this;
 
 	/**
 	* 	@header path.normalize(p)
@@ -118,133 +115,110 @@ component accessors=true {
 		var thePath = "";
 
 	    if(isWindows) {
-		//    for (var i = arrayLen(argsArr); i >= 0 && !resolvedAbsolute; i--) {
+		   for (var i = arrayLen(argsArr); i >= 0 && !resolvedAbsolute; i--) {
 
-		//    thePath = "";
-		// 	console.log("====  " & i & "  ====");
-		//       if (i >= 1) {
-		//       	thePath = arguments[i];
-		//         console.log("[PATH] " & thePath);
-		//       } else if (_.isEmpty(resolvedDevice)) {
-		//         thePath = expandPath('/');
-		//       	console.log("[PATH] " & thePath);
-		//       } else {
-		//         // Windows has the concept of drive-specific current working
-		//         // directories. If we've resolved a drive letter but not yet an
-		//         // absolute path, get cwd for that drive. We're sure the device is not
-		//         // an unc path at this points, because unc paths are always absolute.
-		//         thePath = env.get('=' & resolvedDevice);
-		//         console.log("[PATH] " & thePath);
-		//         // Verify that a drive-local cwd was found and that it actually points
-		//         // to our drive. If not, default to the drive's root.
-		//         if (_.isEmpty(thePath) || mid(lcase(thePath),1,4) NEQ
-		//             lcase(resolvedDevice) & '\') {
-		//           thePath = resolvedDevice & '\';
-		//         }
-		//       }
+		   thePath = "";
+		      if (i >= 1) {
+		      	thePath = arguments[i];
+		      } else if (_.isEmpty(resolvedDevice)) {
+		        thePath = expandPath('/');
+		      } else {
+		        // Windows has the concept of drive-specific current working
+		        // directories. If we've resolved a drive letter but not yet an
+		        // absolute path, get cwd for that drive. We're sure the device is not
+		        // an unc path at this points, because unc paths are always absolute.
+		        thePath = env.get('=' & resolvedDevice);
+		        // Verify that a drive-local cwd was found and that it actually points
+		        // to our drive. If not, default to the drive's root.
+		        if (_.isEmpty(thePath) || mid(lcase(thePath),1,4) NEQ
+		            lcase(resolvedDevice) & '\') {
+		          thePath = resolvedDevice & '\';
+		        }
+		      }
 
-		//       // Skip empty and invalid entries
-		//       if (!_.isString(thePath) || _.isEmpty(thePath)) {
-		//       	console.log("invalid");
-		//         continue;
-		//       }
+		      // Skip empty and invalid entries
+		      if (!_.isString(thePath) || _.isEmpty(thePath)) {
+		        continue;
+		      }
 
-		// 	//split the path to array
-		// 	var result = splitDeviceRe.match(thePath);
-		// 	var device = (!isNull(result[2]) && !_.isEmpty(result[2])? result[2] : '');
-		// 	var isUnc = (!_.isEmpty(device) && charAt(device,2) NEQ ':');
-		// 	var isAbsolute = (!isNull(result[3]) && !_.isEmpty(result[3]))? true : isUnc;
-		// 	var tail = result[4];
+			//split the path to array
+			var result = splitDeviceRe.match(thePath);
+			var device = (!isNull(result[2]) && !_.isEmpty(result[2])? result[2] : '');
+			var isUnc = (!_.isEmpty(device) && charAt(device,2) NEQ ':');
+			var isAbsolute = (!isNull(result[3]) && !_.isEmpty(result[3]))? true : isUnc;
+			var tail = result[4];
 
-		//      console.log("device: " & device);
-		// 	console.log("unc: " & isUnc);
-		// 	console.log("absolute: " & isAbsolute);
-		// 	console.log("tail: " & tail);
+			if (!_.isEmpty(device) &&
+			  !_.isEmpty(resolvedDevice) &&
+			  lcase(device) NEQ lcase(resolvedDevice)) {
+			// This path points to another device so it is not applicable
+			continue;
+			}
 
-		// 	if (!_.isEmpty(device) &&
-		// 	  !_.isEmpty(resolvedDevice) &&
-		// 	  lcase(device) NEQ lcase(resolvedDevice)) {
-		// 	// This path points to another device so it is not applicable
-		// 		console.log("this path points to another device so it is not applicable");
-		// 	continue;
-		// 	}
+			if (_.isEmpty(resolvedDevice)) {
+				resolvedDevice = device;
+			}
 
-		// 	if (_.isEmpty(resolvedDevice)) {
-		// 		console.log("resolvedDevice is empty, setting to device: '#device#'")
-		// 		resolvedDevice = device;
-		// 	}
+			if (!resolvedAbsolute) {
+			resolvedTail = tail & '\' & resolvedTail;
+			resolvedAbsolute = isAbsolute;
+			}
 
-		// 	if (!resolvedAbsolute) {
-		// 	resolvedTail = tail & '\' & resolvedTail;
-		// 	resolvedAbsolute = isAbsolute;
-		// 		console.log("not resolvedAbsolute, setting resolvedTail = #resolvedTail# and resolvedAbsolute is #resolvedAbsolute#");
-		// 	}
-
-		// 	if (!_.isEmpty(resolvedDevice) && resolvedAbsolute) {
-		// 		console.log("resolvedDevice is #resolvedDevice#, and resolvedAbs = #resolvedAbsolute#");
-		// 		break;
-		// 	}
-		// }
-		// 	console.log("out of LOOP now");
-		// 	console.log("resolvedDevice = #resolvedDevice#");
-		// 	// Replace slashes (in UNC share name) by backslashes
-		// 	resolvedDevice = rereplace(resolvedDevice,"\/",'\',"ALL");
-		// 	console.log("resolvedDevice is now #resolvedDevice#");
-		// 	// At this point the path should be resolved to a full absolute path,
-		// 	// but handle relative paths to be safe (might happen when process.cwd()
-		// 	// fails)
-
-		// 	//Normalize the tail path
-		// 	console.log("resolvedTail = #resolvedTail#");
-		// 	resolvedTail = listToArray(fixSeps(resolvedTail),"\");
-		// 	console.log(resolvedTail);
-		// 	//filter array
-		// 	ArrayFilter(resolvedTail,function(p) {
-		// 		return !_.isEmpty(p);
-		// 	});
-
-		// 	resolvedTail = normalizeArray(resolvedTail,(!isAbsolute));
-		// 	console.log(resolvedTail);
-		// 	//writeDump(var=resolvedTail,abort=true);
-		// 	//convert it back to a string
-		// 	resolvedTail = arrayToList(resolvedTail,"\");
-		// 	finalPath = resolvedDevice & ((  resolvedAbsolute)? '\' : '') & resolvedTail;
-		// 	return (!_.isEmpty(finalPath))? finalPath : '.';
-	    } else {
-	    		for (var i = structCount(arguments); i >= 0 && !resolvedAbsolute; i--) {
-					console.log("arg ###i#");
-					thePath = (i >= 1) ? arguments[i] : expandPath('/');
-					console.log("[PATH] " & thePath);
-					// Skip empty and invalid entries
-					if (!_.isString(thePath) || _.isEmpty(thePath)) {
-						continue;
-					}
-					resolvedPath = thePath & '/' & resolvedPath;
-					resolvedAbsolute = left(thePath,1) EQ '/';
-			    }
-
-			    // At this point the thePath should be resolved to a full absolute thePath, but
-			    // handle relative thePaths to be safe (might happen when process.cwd() fails)
-			    //split the path to array
-			    console.log("SHOULD BE ABSOLUTE: " & thePath);
-
-				var pathsSplit = listToArray(resolvedPath,"/");
+			if (!_.isEmpty(resolvedDevice) && resolvedAbsolute) {
 				
-				console.log(pathsSplit);
+				break;
+			}
+		}
+			// Replace slashes (in UNC share name) by backslashes
+			resolvedDevice = rereplace(resolvedDevice,"\/",'\',"ALL");
+			// At this point the path should be resolved to a full absolute path,
+			// but handle relative paths to be safe (might happen when process.cwd()
+			// fails)
 
-				//filter out empty strings
-				pathsSplit = arrayFilter(pathsSplit,function(p) {
-					return !_.isEmpty(arguments.p);
-				});
+			//Normalize the tail path
+			resolvedTail = listToArray(fixSeps(resolvedTail),"\");
+			//filter array
+			ArrayFilter(resolvedTail,function(p) {
+				return !_.isEmpty(p);
+			});
 
-				//normalize array
-				pathsSplit = normalizeArray(pathsSplit,!resolvedAbsolute);
-				//return path back to it's string
-				resolvedPath = ArrayToList(pathsSplit,"/");
+			resolvedTail = normalizeArray(resolvedTail,(!isAbsolute));
+			//writeDump(var=resolvedTail,abort=true);
+			//convert it back to a string
+			resolvedTail = arrayToList(resolvedTail,"\");
+			finalPath = resolvedDevice & ((  resolvedAbsolute)? '\' : '') & resolvedTail;
+			return (!_.isEmpty(finalPath))? finalPath : '.';
+	    } else {
+    		for (var i = structCount(arguments); i >= 0 && !resolvedAbsolute; i--) {
+				thePath = (i >= 1) ? arguments[i] : expandPath('/');
+				// Skip empty and invalid entries
+				if (!_.isString(thePath) || _.isEmpty(thePath)) {
+					continue;
+				}
+				resolvedPath = thePath & '/' & resolvedPath;
+				resolvedAbsolute = left(thePath,1) EQ '/';
+		    }
 
-				returnPath = ((resolvedAbsolute ? '/' : '') & resolvedPath);
-				return (len(trim(returnPath)) GT 0)? returnPath : '.';
-	    	}
+		    // At this point the thePath should be resolved to a full absolute thePath, but
+		    // handle relative thePaths to be safe (might happen when process.cwd() fails)
+		    //split the path to array
+		    
+			var pathsSplit = listToArray(resolvedPath,"/");
+			
+			
+			//filter out empty strings
+			pathsSplit = arrayFilter(pathsSplit,function(p) {
+				return !_.isEmpty(arguments.p);
+			});
+
+			//normalize array
+			pathsSplit = normalizeArray(pathsSplit,!resolvedAbsolute);
+			//return path back to it's string
+			resolvedPath = ArrayToList(pathsSplit,"/");
+
+			returnPath = ((resolvedAbsolute ? '/' : '') & resolvedPath);
+			return (len(trim(returnPath)) GT 0)? returnPath : '.';
+	    }
 	}
 
 	public any function join() {
@@ -405,11 +379,6 @@ component accessors=true {
 			basename = ((!isNull(result[3]))? result[3] : '');
 			ext = ((!isNull(result[4]))? result[4] : '');
 		};
-		console.log("splitPath");
-		console.log("device: #device#");
-		console.log("dir: #dir#");
-		console.log("basename: #basename#");
-		console.log("ext: #ext#");
 		return [device,dir,basename,ext];
 	}
 

@@ -16,7 +16,7 @@ component name="RegExp" accessors=true {
 	}
 
 	public any function test(str) {
-		var matches = [];
+		var matches = {};
 
 		if(this.insensitive) {
 			matches = this.match(arguments.str);
@@ -24,7 +24,7 @@ component name="RegExp" accessors=true {
 			matches = this.match(arguments.str);
 		}
 
-		if(arrayLen(matches) GT 0) {
+		if(structCount(matches) GT 0) {
 			return true;
 		} else {
 			matches = REMatch(this.getPattern(),arguments.str);
@@ -50,6 +50,7 @@ component name="RegExp" accessors=true {
 	public array function match(text,scope = "all") {
 		var local = structnew();
 		local.results = ArrayNew(1);
+		local.GROUPS = {};
 		local.pattern =createobject( "java", "java.util.regex.Pattern" ).compile( javacast( "string", this.getPattern()));
 		
 		local.matcher =local.pattern.matcher( javacast( "string", arguments.text ) );
@@ -66,6 +67,7 @@ component name="RegExp" accessors=true {
 			}
 			
 		}
+
 		return LOCAL.Groups;
 	}
 

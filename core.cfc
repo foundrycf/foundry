@@ -85,11 +85,10 @@ component {
 		var xWithCFM = (right(x,4) EQ ".cfm" AND right(x,4) EQ ".cfc")? x : replace(x,'.cfc','') & ".cfm";
 
 		if(isFile(x)) {
-			console.log("-----[LOAD_FILE] #x#");
 			return createObject("component",compPath);
 		} else if (isFile(xWithCFC)) {
 			console.log("-----[LOAD_FILE] #xWithCFC#");
-			return createObject("component",compPath);
+			return compPath;
 		} else if (isFile(xWithCFM)) {
 			console.log("-----[LOAD_FILE] #xWithCFM#");
 			return fileRead(x);
@@ -189,6 +188,18 @@ component {
 
 	private void function cacheModule() {
 
+	}
+
+	private string function checkForInit(x) {
+		var data = getMetaData(x);
+		var constructorNames = "init";
+		for (func in data.functions) {
+			if(listFindNoCase(constructorNames,func.name)) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	private boolean function isFile(x) {

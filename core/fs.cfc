@@ -41,7 +41,7 @@ component name="fs" {
   			directoryCreate(path=path.resolve(expandPath('/'), p));
   			FileSetAccessMode(path.resolve(expandPath('/'), p), mode);
   		} catch(any err1) {
-  			cb(err);
+  			cb(err1);
   			return false;
   		}
 
@@ -130,48 +130,55 @@ component name="fs" {
 		return stat(path);
 	}
 
-	function writeAll(fd, buffer, offset, length, position, cb) {
-		var _ = new util().init();
-		var noop = function() {};
-		var callback_ = (_.isFunction(cb)) ? cb : noop;
+	// public any function writeAll(fd, buffer, offset, length, position, cb) {
+	// 	var _ = new util().init();
+	// 	var noop = function() {};
+	// 	var callback_ = (_.isFunction(cb)) ? cb : noop;
 
-		fs.write(fd, buffer, offset, length, position, function(writeErr, written) {
-			if (structKeyExists(arguments, 'writeErr')) {
-				fs.close(fd, function() {
-					if (_.isEmpty(callback_)) callback_(writeErr);
-				});
+	// 	fs.write(fd, buffer, offset, length, position, function(writeErr, written) {
+	// 		if (structKeyExists(arguments, 'writeErr')) {
+	// 			fs.close(fd, function() {
+	// 				if (_.isEmpty(callback_)) callback_(writeErr);
+	// 			});
 
-			} else {
-				if (structKeyExists(arguments, 'written') && written === length) {
-					fs.close(fd, callback);
+	// 		} else {
+	// 			if (structKeyExists(arguments, 'written') && written === length) {
+	// 				fs.close(fd, callback);
 	
-				} else {
-					offset += written;
-					length -= written;
-					position += written;
+	// 			} else {
+	// 				offset += written;
+	// 				length -= written;
+	// 				position += written;
 					
-					writeAll(fd, buffer, offset, length, position, callback);
-				}
-			}
-		});
-	}
+	// 				writeAll(fd, buffer, offset, length, position, callback);
+	// 			}
+	// 		}
+	// 	});
+	// }
 
-	public any function writeFile(path, data, encoding_, cb) {
+	public any function writeFile(p, data, encoding_, cb) {
 		var _ = new util().init();
+		var path = new path();
   		var encoding = (structKeyExists(arguments,'encoding_') && _.isString(encoding_)) ? encoding_ : 'utf8';
   		//assertEncoding(encoding);
 	    var noop = function() {};
   		var callback_ = (structKeyExists(arguments, 'cb') && _.isFunction(cb)) ? cb : noop;
-  
-  		open(path, 'w', 438 /*=0666*/, function(openErr, fd) {
+  		
+  		open(p, 'w', 438 /*=0666*/, function(openErr, fd) {
     		if (structKeyExists(arguments, 'openErr') && !_.isEmpty(openErr)) {
       			if(_.isFunction(callback_)) callback_(openErr);
 			} else {
-      			//var buffer = Buffer.isBuffer(data) ? data : new Buffer('' + data, encoding);
-      			writeAll(fd, buffer, 0, buffer.length, 0, callback);
+				if(directoryExists(fd.path)) {
+  					fileWrite(fd, data, encoding);
+  				} else {
+  					mkdir(fd.path, 0777, function(er) {
+				        if (!structKeyExists(arguments, 'er') || _.isEmpty(arguments.er)) {
+  							fileWrite(fd, data, encoding);
+				        }
+  					});
+				}
     		}
   		});
-
 
 	}
 

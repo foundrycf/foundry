@@ -13,6 +13,8 @@ component name="RegExp" accessors=true {
 		this.insensitive = arguments.insensitive;
 		this.global = arguments.global;
 		variables.console = new foundry.core.Console();
+
+		return this;
 	}
 
 	public any function test(str) {
@@ -72,7 +74,26 @@ component name="RegExp" accessors=true {
 	}
 
 	public any function replace(text,replacement) {
-		return reReplace(text,this.getPattern(),replacement);
+		return reReplaceNoCase(text,this.getPattern(),replacement);
+	}
+
+	/**
+	* reSplit UDF
+	* @Author Ben Nadel <http://bennadel.com/>
+	*/
+	public any function split(value) {
+		var local = {};
+		local.result = [];
+		local.parts = javaCast( "string", arguments.value ).split(
+			javaCast( "string", this.getPattern() ),
+			javaCast( "int", -1 )
+		);
+
+		for (local.part in local.parts) {
+			arrayAppend(local.result,local.part );
+		};
+
+		return local.result;
 	}
 
 }

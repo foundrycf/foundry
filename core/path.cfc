@@ -468,9 +468,9 @@ component accessors=true {
 
 	public any function exists(path, callback) {
 	  if(fileExists(path) || directoryExists(path)) {
-	  	return true;
+	  	callback(true);
 	  } else {
-	  	return false;
+	  	callback(false);
 	  };
 	};
 

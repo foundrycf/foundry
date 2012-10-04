@@ -31,29 +31,29 @@ component name="emitter" extends="foundry.core" {
 
 	public any function emit() {
 		var type = arguments[1];
-		//If there is no 'error' event listener then throw.
-		// if (type EQ 'error') {
-		// 	if (!structKeyExists(this,'_events') || !structKeyExists(this._events,'error') || (_.isArray(this._events.error) && !arrayLen(this._events.error)))
-		// 	{
-		// 		//Maybe we can use the "domain" logic for "application" scoped events?
-		// 		// if (this.domain) {
-		// 		//   var er = arguments[1];
-		// 		//   er.domain_emitter = this;
-		// 		//   er.domain = this.domain;
-		// 		//   er.domain_thrown = false;
-		// 		//   this.domain.emit('error', er);
-		// 		//   return false;
-		// 		// }
+	//	If there is no 'error' event listener then throw.
+		if (type EQ 'error') {
+			if (!structKeyExists(this,'_events') || !structKeyExists(this._events,'error') || (_.isArray(this._events.error) && !arrayLen(this._events.error)))
+			{
+				//Maybe we can use the "domain" logic for "application" scoped events?
+				// if (this.domain) {
+				//   var er = arguments[1];
+				//   er.domain_emitter = this;
+				//   er.domain = this.domain;
+				//   er.domain_thrown = false;
+				//   this.domain.emit('error', er);
+				//   return false;
+				// }
 
-		// 	if (structKeyExists(arguments,1)) {
-		// 		throw (); // Unhandled 'error' event
-		// 	} else {
-		// 		throw("Uncaught, unspecified 'error' event.");
-		// 	}
+			if (structKeyExists(arguments,1)) {
+				//throw (""); // Unhandled 'error' event
+			} else {
+				throw("Uncaught, unspecified 'error' event.");
+			}
 
-		// 	return false;
-		// 	}
-		// }
+			return false;
+			}
+		}
 
 	  if (!structKeyExists(this,'_events')) return false;
 

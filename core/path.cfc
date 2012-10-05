@@ -120,23 +120,23 @@ component accessors=true {
 				
 				if (i >= 1) {
 					thePath = arguments[i];
-					console.print("firstif path: " & serialize(thePath));
+					
 				} else if (_.isEmpty(resolvedDevice)) {
 					thePath = expandPath('/');
-					console.print("secondif path: " & serialize(thePath));
+					
 				} else {
-					// // Windows has the concept of drive-specific current working
-					// // directories. If we've resolved a drive letter but not yet an
-					// // absolute path, get cwd for that drive. We're sure the device is not
-					// // an unc path at this points, because unc paths are always absolute.
-					// thePath = env.get('=' & resolvedDevice);
-					// // Verify that a drive-local cwd was found and that it actually points
-					// // to our drive. If not, default to the drive's root.
-					// if (_.isEmpty(thePath) || mid(lcase(thePath),1,4) NEQ
-					// 	lcase(resolvedDevice) & '\') {
-					// 	thePath = resolvedDevice & '\';
-					// }
-					// console.print("thirdif path: " & serialize(thePath));
+					// Windows has the concept of drive-specific current working
+					// directories. If we've resolved a drive letter but not yet an
+					// absolute path, get cwd for that drive. We're sure the device is not
+					// an unc path at this points, because unc paths are always absolute.
+					thePath = env.get('=' & resolvedDevice);
+					// Verify that a drive-local cwd was found and that it actually points
+					// to our drive. If not, default to the drive's root.
+					if (_.isEmpty(thePath) || mid(lcase(thePath),1,4) NEQ
+						lcase(resolvedDevice) & '\') {
+						thePath = resolvedDevice & '\';
+					}
+					
 				}
 
 				// Skip empty and invalid entries
@@ -146,16 +146,11 @@ component accessors=true {
 
 				//split the path to array
 				var result = splitDeviceRe.match(thePath);
-				console.print("result: " & serialize(result));
 				var device = (!isNull(result[1]) && !_.isEmpty(result[1])? result[1] : '');
-				console.print("device: " & serialize(device));
 				var isUnc = (!_.isEmpty(device) && device.charAt(1) NEQ ':');
-				console.print("unc: " & serialize(isUnc));
 				var isAbsolute = (!isNull(result[2]) && !_.isEmpty(result[2]))? true : isUnc;
-				console.print("absolute: " & serialize(isAbsolute));
 				var tail = result[3];
-				console.print("tail: " & serialize(tail));
-
+				
 				if (!_.isEmpty(device) &&
 				!_.isEmpty(resolvedDevice) &&
 				lcase(device) NEQ lcase(resolvedDevice)) {

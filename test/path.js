@@ -100,7 +100,7 @@ if (isWindows) {
     var resolvedDevice = '',
         resolvedTail = '',
         resolvedAbsolute = false;
-
+        
     for (var i = arguments.length - 1; i >= -1; i--) {
       var path;
       if (i >= 0) {
@@ -131,11 +131,16 @@ if (isWindows) {
         continue;
       }
 
-      var result = splitDeviceRe.exec(path),
-          device = result[1] || '',
-          isUnc = device && device.charAt(1) !== ':',
-          isAbsolute = !!result[2] || isUnc, // UNC paths are always absolute
-          tail = result[3];
+      var result = splitDeviceRe.exec(path);
+        console.log("result: " + result);
+      var device = result[1] || '';
+        console.log("device: " + device);
+      var  isUnc = device && device.charAt(1) !== ':';
+        console.log("unc: " + isUnc);
+      var  isAbsolute = !!result[2] || isUnc; // UNC paths are always absolute
+        console.log("absolute: " + isAbsolute);
+      var  tail = result[3];
+        console.log("tail: " + tail);
 
       if (device &&
           resolvedDevice &&

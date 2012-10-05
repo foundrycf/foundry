@@ -226,6 +226,8 @@ if (isWindows) {
 }
 var failures = [];
 resolveTests.forEach(function(test) {
+
+      console.log("----------------")
   var actual = path.resolve.apply(path, test[0]);
   var expected = test[1];
   var message = 'path.resolve(' + test[0].map(JSON.stringify).join(',') + ')' +
@@ -233,6 +235,8 @@ resolveTests.forEach(function(test) {
                 '\n  actual=' + JSON.stringify(actual);
   if (actual !== expected) failures.push('\n' + message);
   // assert.equal(actual, expected, message);
+
+      console.log("----------------")
 });
 assert.equal(failures.length, 0, failures.join(''));
 console.log("============");

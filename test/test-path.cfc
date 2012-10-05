@@ -201,7 +201,12 @@ component name="pathTests" extends="mxunit.framework.testcase" {
 		  // windows
 		  var resolveTests =
 		      // arguments                                    result
-		      [[['c:/ignore', 'd:\a/b\c/d', '\e.exe'], 'd:\e.exe']];
+     [[['c:/blah\blah', 'd:/games', 'c:../a'], 'c:\blah\a'],
+       [['c:/ignore', 'd:\a/b\c/d', '\e.exe'], 'd:\e.exe'],
+       [['c:/ignore', 'c:/some/file'], 'c:\some\file'],
+       [['d:/ignore', 'd:some/dir//'], 'd:\ignore\some\dir'],
+       [['.'], cwd],
+       [['//server/share', '..', 'relative\'], '\\server\share\relative']];
 		} else {
 		  // Posix
 		  var resolveTests = 
@@ -215,13 +220,15 @@ component name="pathTests" extends="mxunit.framework.testcase" {
 		}
 		var failures = [];
 		_.forEach(resolveTests,function(test) {
+			console.print("----------------")
 		  var actual = path.resolve(argumentCollection=test[1]);
 		  var expected = test[2];
 		   var message = 'path.resolve(' & serialize(test[1]) & ')' &
 		                '<br />  expect=' & serialize(expected) &
 		                '<br />  actual=' & serialize(actual);
 		  if (actual NEQ expected) failures.add('<br />' & message);
-		//assertEquals(expected, actual, message);
+		assertEquals(expected, actual, message);
+			console.print("----------------")
 		});
 		assertEquals(0,arrayLen(failures),arrayToList(failures,''));
 	}

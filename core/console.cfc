@@ -6,7 +6,6 @@
 component {
 	variables.System = createObject("java","java.lang.System");
 	public any function init(opts = {}) {
-		
 		return this;
 	}
 
@@ -16,24 +15,30 @@ component {
 	}
 
 	public any function info(obj) {
-		return System.out.println("INFO: " & obj);
+		savecontent variable="output" { writeDump(var=obj,format="text"); }
+    	return System.out.println("INFO: " & removeHtml(output));
 	}
 
 	public any function config(obj) {
-		return System.out.println("CONFIG: " & obj);
+		savecontent variable="output" { writeDump(var=obj,format="text"); }
+    	return System.out.println("CONFIG: " & removeHtml(output));
 	}
 
 	public any function error(obj) {
-		return System.out.println("ERROR: " & obj);
+		savecontent variable="output" { writeDump(var=obj,format="text"); }
+    	return System.out.println("ERROR: " & removeHtml(output));
 	}
 
 	public any function warning(obj) {
-		return System.out.println("WARN: " & obj);
+		savecontent variable="output" { writeDump(var=obj,format="text"); }
+    	return System.out.println("WARN: " & removeHtml(output));
 	}
 
 	public any function print(str) {
 		return System.out.println(str);
 	}
+
+	//HELPERS
 	private any function removeHTML(source){
 		
 		// Remove all spaces becuase browsers ignore them

@@ -1,13 +1,9 @@
 # process
-
 <!-- type=global -->
-
-The `process` object is a global object and can be accessed from anywhere.
-It is an instance of [EventEmitter][].
-
+It is an instance of [Emitter][].
 
 ## Event: 'exit'
-
+**NOT AVAILABLE**
 Emitted when the process is about to exit.  This is a good hook to perform
 constant time checks of the module's state (like for unit tests).  The main
 event loop will no longer be run after the 'exit' callback finishes, so
@@ -23,7 +19,7 @@ Example of listening for `exit`:
     });
 
 ## Event: 'uncaughtException'
-
+**NOT AVAILABLE**
 Emitted when an exception bubbles all the way back to the event loop. If a
 listener is added for this exception, the default action (which is to print
 a stack trace and exit) will not occur.
@@ -58,7 +54,7 @@ Nine out of ten times nothing happens - but the 10th time, your system is bust.
 You have been warned.
 
 ## Signal Events
-
+**NOT AVAILABLE**
 <!--type=event-->
 <!--name=SIGINT, SIGUSR1, etc.-->
 
@@ -79,7 +75,8 @@ programs.
 
 
 ## process.stdout
-
+**NOT AVAILABLE**
+**USE CONSOLE MODULE INSTEAD FOR NOW!**
 A `Writable Stream` to `stdout`.
 
 Example: the definition of `console.log`
@@ -95,7 +92,7 @@ refer to pipes, they are non-blocking like other streams.
 
 
 ## process.stderr
-
+**NOT AVAILABLE**
 A writable stream to stderr.
 
 `process.stderr` and `process.stdout` are unlike other streams in Node in
@@ -105,7 +102,7 @@ refer to pipes, they are non-blocking like other streams.
 
 
 ## process.stdin
-
+**NOT AVAILABLE**
 A `Readable Stream` for stdin. The stdin stream is paused by default, so one
 must call `process.stdin.resume()` to read from it.
 
@@ -124,7 +121,7 @@ Example of opening standard input and listening for both events:
 
 
 ## process.argv
-
+**NOT AVAILABLE**
 An array containing the command line arguments.  The first element will be
 'node', the second element will be the name of the JavaScript file.  The
 next elements will be any additional command line arguments.
@@ -145,7 +142,7 @@ This will generate:
 
 
 ## process.execPath
-
+**NOT AVAILABLE**
 This is the absolute pathname of the executable that started the process.
 
 Example:
@@ -154,12 +151,12 @@ Example:
 
 
 ## process.abort()
-
+**NOT AVAILABLE**
 This causes node to emit an abort. This will cause node to exit and
 generate a core file.
 
 ## process.chdir(directory)
-
+**NOT AVAILABLE**
 Changes the current working directory of the process or throws an exception if that fails.
 
     console.log('Starting directory: ' + process.cwd());
@@ -174,19 +171,19 @@ Changes the current working directory of the process or throws an exception if t
 
 
 ## process.cwd()
-
+**NOT AVAILABLE**
 Returns the current working directory of the process.
 
     console.log('Current directory: ' + process.cwd());
 
 
-## process.env
+## process.env([environment_variable_to_get])
 
-An object containing the user environment. See environ(7).
+An object containing the user environment variables. See environ(7).
 
 
 ## process.exit([code])
-
+**NOT AVAILABLE**
 Ends the process with the specified `code`.  If omitted, exit uses the
 'success' code `0`.
 
@@ -198,7 +195,7 @@ The shell that executed node should see the exit code as 1.
 
 
 ## process.getgid()
-
+**NOT AVAILABLE**
 Note: this function is only available on POSIX platforms (i.e. not Windows)
 
 Gets the group identity of the process. (See getgid(2).)
@@ -210,7 +207,7 @@ This is the numerical group id, not the group name.
 
 
 ## process.setgid(id)
-
+**NOT AVAILABLE**
 Note: this function is only available on POSIX platforms (i.e. not Windows)
 
 Sets the group identity of the process. (See setgid(2).)  This accepts either
@@ -230,7 +227,7 @@ blocks while resolving it to a numerical ID.
 
 
 ## process.getuid()
-
+**NOT AVAILABLE**
 Note: this function is only available on POSIX platforms (i.e. not Windows)
 
 Gets the user identity of the process. (See getuid(2).)
@@ -242,7 +239,7 @@ This is the numerical userid, not the username.
 
 
 ## process.setuid(id)
-
+**NOT AVAILABLE**
 Note: this function is only available on POSIX platforms (i.e. not Windows)
 
 Sets the user identity of the process. (See setuid(2).)  This accepts either
@@ -262,13 +259,13 @@ blocks while resolving it to a numerical ID.
 
 
 ## process.version
-
+**NOT AVAILABLE YET**
 A compiled-in property that exposes `NODE_VERSION`.
 
     console.log('Version: ' + process.version);
 
 ## process.versions
-
+**NOT AVAILABLE YET**
 A property exposing version strings of node and its dependencies.
 
     console.log(process.versions);
@@ -282,7 +279,7 @@ Will output:
       openssl: '1.0.0e-fips' }
 
 ## process.config
-
+**NOT AVAILABLE YET**
 An Object containing the JavaScript representation of the configure options
 that were used to compile the current node executable. This is the same as
 the "config.gypi" file that was produced when running the `./configure` script.
@@ -309,7 +306,7 @@ An example of the possible output looks like:
          v8_use_snapshot: 'true' } }
 
 ## process.kill(pid, [signal])
-
+**NOT AVAILABLE**
 Send a signal to a process. `pid` is the process id and `signal` is the
 string describing the signal to send.  Signal names are strings like
 'SIGINT' or 'SIGUSR1'.  If omitted, the signal will be 'SIGTERM'.
@@ -334,25 +331,24 @@ Example of sending a signal to yourself:
 
 
 ## process.pid
-
 The PID of the process.
 
     console.log('This process is pid ' + process.pid);
 
 ## process.title
-
+**NOT AVAILABLE**
 Getter/setter to set what is displayed in 'ps'.
 
 
 ## process.arch
-
+**NOT AVAILABLE**
 What processor architecture you're running on: `'arm'`, `'ia32'`, or `'x64'`.
 
     console.log('This processor architecture is ' + process.arch);
 
 
 ## process.platform
-
+**COMING SOON**
 What platform you're running on:
 `'darwin'`, `'freebsd'`, `'linux'`, `'sunos'` or `'win32'`
 
@@ -360,7 +356,7 @@ What platform you're running on:
 
 
 ## process.memoryUsage()
-
+**NOT AVAILABLE YET**
 Returns an object describing the memory usage of the Node process
 measured in bytes.
 
@@ -378,7 +374,7 @@ This will generate:
 
 
 ## process.nextTick(callback)
-
+**NOT AVAILABLE**
 On the next loop around the event loop call this callback.
 This is *not* a simple alias to `setTimeout(fn, 0)`, it's much more
 efficient.  It typically runs before any other I/O events fire, but there
@@ -439,7 +435,7 @@ This approach is much better:
     }
 
 ## process.maxTickDepth
-
+**NOT AVAILABLE**
 * {Number} Default = 1000
 
 Callbacks passed to `process.nextTick` will *usually* be called at the
@@ -462,7 +458,7 @@ nextTick-calling nextTick-callbacks that will be evaluated before
 allowing other forms of I/O to occur.
 
 ## process.umask([mask])
-
+**NOT AVAILABLE**
 Sets or reads the process's file mode creation mask. Child processes inherit
 the mask from the parent process. Returns the old mask if `mask` argument is
 given, otherwise returns the current mask.
@@ -475,12 +471,12 @@ given, otherwise returns the current mask.
 
 
 ## process.uptime()
-
+**NOT AVAILABLE**
 Number of seconds Node has been running.
 
 
 ## process.hrtime()
-
+**NOT AVAILABLE**
 Returns the current high-resolution real time in a `[seconds, nanoseconds]`
 tuple Array. It is relative to an arbitrary time in the past. It is not
 related to the time of day and therefore not subject to clock drift. The
@@ -500,4 +496,4 @@ a diff reading, useful for benchmarks and measuring intervals:
       // benchmark took 1 seconds and 6962306 nanoseconds
     }, 1000);
 
-[EventEmitter]: events.html#events_class_events_eventemitter
+[Emitter]: emitter.markdown

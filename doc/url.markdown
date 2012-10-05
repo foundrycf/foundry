@@ -1,6 +1,6 @@
 # URL
 
-    Stability: 3 - Stable
+**NOTE: This documentation needs revised to reflect current Foundry capabilities.**
 
 This module has utilities for URL resolution and parsing.
 Call `require('url')` to use it.
@@ -74,7 +74,7 @@ Pass `true` as the third argument to treat `//foo/bar` as
 `{ pathname: '//foo/bar' }`. Defaults to `false`.
 
 ## url.format(urlObj)
-
+**NEEDS WRITTEN**
 Take a parsed URL object, and return a formatted URL string.
 
 * `href` will be ignored.
@@ -94,6 +94,6 @@ Take a parsed URL object, and return a formatted URL string.
 * `hash` is treated the same with or without the leading `#` (pound sign, anchor)
 
 ## url.resolve(from, to)
-
+**NEEDS WRITTEN**
 Take a base URL, and a href URL, and resolve them as a browser would for
 an anchor tag.

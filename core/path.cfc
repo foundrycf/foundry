@@ -396,22 +396,6 @@ component accessors=true {
 		return [device,dir,basename,ext];
 	}
 
-	private array function arrtrim(arr) {
-		var theArr = arguments.arr;
-		var start = 1;
-		for (; start LT arrayLen(theArr); start++) {
-			if (!_.isEmpty(theArr[start])) break;
-		}
-
-		var end = arrayLen(theArr);
-		for (; end GTE 0; end--) {
-			if (!_.isEmpty(theArr[end])) break;
-		}
-
-		if (start GT end) return [];
-		return arraySlice(theArr,start,end - start + 1);
-    }
-
 	// resolves . and .. elements in a path array with directory names there
 	// must be no slashes, empty elements, or device names (c:\) in the array
 	// (so also no leading and trailing slashes - it does not distinguish
@@ -480,21 +464,49 @@ component accessors=true {
 		return f;
 	};
 
-	public any function exists(path, callback) {
-	  if(fileExists(path) || directoryExists(path)) {
-	  	callback(true);
-	  } else {
-	  	callback(false);
-	  };
-	};
+	public any function sep() {
+		return toString(jpath.separatorsToSystem("/"));
+	}
 
-	public any function existsSync(path, callback) {
-	  if(fileExists(path) || directoryExists(path)) {
-	  	callback();
-	  };
-	};
+	//this shouldn't be included, I believe normalize would solve this...
+	public any function fixSeps(x) {
+		return toString(jpath.separatorsToSystem(x));
+	}
 
-	public any function unshift(obj = this.obj) {
+	//deprecated!!
+	// public any function exists(path, callback) {
+	//   if(fileExists(path) || directoryExists(path)) {
+	//   	callback(true);
+	//   } else {
+	//   	callback(false);
+	//   };
+	// };
+
+	// public any function existsSync(path, callback) {
+	//   if(fileExists(path) || directoryExists(path)) {
+	//   	callback();
+	//   };
+	// };
+
+
+	//PRIVATE HELPERS / UTILITIES / UDF
+	private array function arrtrim(arr) {
+		var theArr = arguments.arr;
+		var start = 1;
+		for (; start LT arrayLen(theArr); start++) {
+			if (!_.isEmpty(theArr[start])) break;
+		}
+
+		var end = arrayLen(theArr);
+		for (; end GTE 0; end--) {
+			if (!_.isEmpty(theArr[end])) break;
+		}
+
+		if (start GT end) return [];
+		return arraySlice(theArr,start,end - start + 1);
+    }
+
+	private any function unshift(obj = this.obj) {
 		var elements = _.slice(arguments, 2);
 		for (var i = arrayLen(elements); i > 0; i--) {
 			arrayPrepend(obj, elements[i]);
@@ -502,22 +514,14 @@ component accessors=true {
 		return obj;
 	}
 
-	function isAbsolute(str) {
+	private string function isAbsolute(str) {
 		return (reFindNoCase("[a-zA-Z]:\\",str) GT 0 || left(str,1) EQ "/");
 	}
 
-	function CharAt(str,pos) {
+	private string function CharAt(str,pos) {
 	    return Mid(str,pos,1);
 	}
 
-	public any function sep() {
-		return toString(jpath.separatorsToSystem("/"));
-	}
-
-
-	public any function fixSeps(x) {
-		return toString(jpath.separatorsToSystem(x));
-	}
 	/**
 	* reSplit UDF
 	* @Author Ben Nadel <http://bennadel.com/>

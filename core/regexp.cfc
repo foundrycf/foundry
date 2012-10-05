@@ -20,7 +20,6 @@ component name="RegExp" accessors=true {
 
 	public any function test(str) {
 		var matches = {};
-		console.print("testing: " & serialize(str));
 		if(this.insensitive) {
 			matches = this.match(arguments.str);
 		} else {

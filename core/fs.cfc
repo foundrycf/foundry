@@ -1,6 +1,7 @@
 component name="fs" {
 	variables.console = new Console();
-
+	variables._ = new Util();
+	variables.path = new Path();
 	// public void function assertEncoding(encoding) {
 	// 	if (structKeyExists(arguments, 'encoding' && !Buffer.isEncoding(encoding)) {
 	// 		throw new Error('Unknown encoding: ' & encoding);
@@ -206,6 +207,34 @@ component name="fs" {
 		var FileWriter = createObject("java","java.io.FileWriter").init(File);
 
 		return FileWriter;
+	}
+
+	public void function copyDir(required source,required destination,ignore = "",required nameconflict = "overwrite") {
+		var files = "";
+		if (not(directoryExists(arguments.destination))) {
+			//console.print("destPath doesn't exist, creating it");
+			directoryCreate(arguments.destination);
+		}
+
+		files = directoryList(path=arguments.source,recurse=false,listInfo="names");
+
+		for(file in files) {
+			var src = file;
+			var dest = path.join(destination,path.basename(file));
+
+			var info = getFileInfo(src);
+			if(info.type EQ 'file') {
+				// console.print("Copying file: #src#");
+				// console.print("to dest file: #dest#");
+				fileCopy(source=src,destination=dest)
+			} else if (info.type EQ 'dir') {
+				//console.print("Copying dir: #file.name#");
+				directoryCopy(src, dest);
+			}
+		}
+
+
+		
 	}
 
 	// public any function writeFileSync(path, data, encoding) {

@@ -117,6 +117,7 @@ component name="config" {
 	public any function init(params) {
 		structAppend(this,params,true);
 		variables.Path = new Path();
+		
 		this.validate();
 
 		return this;

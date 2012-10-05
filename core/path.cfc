@@ -514,7 +514,7 @@ component accessors=true {
 		return obj;
 	}
 
-	private string function isAbsolute(str) {
+	public boolean function isAbsolute(str) {
 		return (reFindNoCase("[a-zA-Z]:\\",str) GT 0 || left(str,1) EQ "/");
 	}
 

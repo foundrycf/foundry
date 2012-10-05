@@ -2,8 +2,8 @@ component name="pathTests" extends="mxunit.framework.testcase" {
 	
 
 	public void function test_basename() {
-		path.basename('/this/is/a/test/okay/test-path.cfc');
-		assertEquals( '/this/is/a/test/okay/test-path.cfc',path.basename(f));
+		//path.basename('/this/is/a/test/okay/test-path.cfc');
+		assertEquals( 'test-path.cfc',path.basename(f));
 		assertEquals( 'test-path',path.basename(f, '.cfc'));
 
 		// POSIX filenames may include control characters

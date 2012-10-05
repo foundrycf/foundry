@@ -68,17 +68,30 @@ if (isWindows) {
   // Function to split a filename into [root, dir, basename, ext]
   // windows version
   var splitPath = function(filename) {
-    // Separate device+slash from tail
-    var result = splitDeviceRe.exec(filename),
-        device = (result[1] || '') + (result[2] || ''),
-        tail = result[3] || '';
-    console.log(result);
-    // Split the tail into dir, basename and extension
-    var result2 = splitTailRe.exec(tail),
-        dir = result2[1] || '',
-        basename = result2[2] || '',
-        ext = result2[3] || '';
-    return [device, dir, basename, ext];
+  // Separate device+slash from tail
+  var result = splitDeviceRe.exec(filename);
+  //console.log("result: " +result);
+
+  var  device = (result[1] || '') + (result[2] || '');
+ // console.log("device: " +device);
+
+  var tail = result[3] || '';
+ // console.log("tail: " +tail);
+      
+  // Split the tail into dir, basename and extension
+  var result2 = splitTailRe.exec(tail);
+  //console.log("result2: " +result2);
+
+  var dir = result2[1] || '';
+ // console.log("dir: " +dir);
+
+  var basename = result2[2] || '';
+  //console.log("basename: " +basename);
+
+  var ext = result2[3] || '';
+  //console.log("ext: " +ext);
+      
+  return [device, dir, basename, ext];
   };
 
   // path.resolve([from ...], to)
@@ -92,10 +105,10 @@ if (isWindows) {
       var path;
       if (i >= 0) {
         path = arguments[i];
-        console.log("[PATH]: " + path);
+        console.log("firstif" + path);
       } else if (!resolvedDevice) {
         path = process.cwd();
-        console.log("[PATH]: " + path);
+        console.log("secondif: " + path);
       } else {
         // Windows has the concept of drive-specific current working
         // directories. If we've resolved a drive letter but not yet an
@@ -109,7 +122,7 @@ if (isWindows) {
           path = resolvedDevice + '\\';
         }
 
-        console.log("[PATH]: " + path);
+        console.log("thirdif: " + path);
       }
 
       // Skip empty and invalid entries
@@ -123,37 +136,26 @@ if (isWindows) {
           isUnc = device && device.charAt(1) !== ':',
           isAbsolute = !!result[2] || isUnc, // UNC paths are always absolute
           tail = result[3];
-      console.log("device: " + device);
-      console.log("isUnc: " + isUnc);
-      console.log("isAbsolute: " + isAbsolute);
-      console.log("tail: " + tail);
-          console.log(result);
+
       if (device &&
           resolvedDevice &&
           device.toLowerCase() !== resolvedDevice.toLowerCase()) {
-        console.log("SKIPPING: points to diff device.");
         // This path points to another device so it is not applicable
         continue;
       }
 
       if (!resolvedDevice) {
         resolvedDevice = device;
-        console.log("resolved device to " + device);
+        
       }
 
-      console.log("resolvedAbsolute: " + resolvedAbsolute)
-
       if (!resolvedAbsolute) {
-
-          console.log("resolvedTail: " + resolvedTail);
         resolvedTail = tail + '\\' + resolvedTail;
         resolvedAbsolute = isAbsolute;
         continue;
-        console.log("resolved tail (" + resolvedTail + ") and " + resolvedAbsolute + ".");
       }
 
       if (resolvedDevice && resolvedAbsolute) {
-        console.log("breaking out da loop!");
         break;
       }
     }

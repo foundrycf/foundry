@@ -114,62 +114,63 @@ component accessors=true {
 	    var resolvedAbsolute = false;
 		var thePath = "";
 
-	    if(isWindows) {
-		   for (var i = arrayLen(argsArr); i >= 0 && !resolvedAbsolute; i--) {
-
-		   thePath = "";
-		      if (i >= 1) {
-		      	thePath = arguments[i];
-		      } else if (_.isEmpty(resolvedDevice)) {
-		        thePath = expandPath('/');
-		      } else {
-		        // Windows has the concept of drive-specific current working
-		        // directories. If we've resolved a drive letter but not yet an
-		        // absolute path, get cwd for that drive. We're sure the device is not
-		        // an unc path at this points, because unc paths are always absolute.
-		        thePath = env.get('=' & resolvedDevice);
-		        // Verify that a drive-local cwd was found and that it actually points
-		        // to our drive. If not, default to the drive's root.
-		        if (_.isEmpty(thePath) || mid(lcase(thePath),1,4) NEQ
-		            lcase(resolvedDevice) & '\') {
-		          thePath = resolvedDevice & '\';
-		        }
-		      }
-
-		      // Skip empty and invalid entries
-		      if (!_.isString(thePath) || _.isEmpty(thePath)) {
-		        continue;
-		      }
-
-			//split the path to array
-			var result = splitDeviceRe.match(thePath);
-			console.log(result);
-			var device = (!isNull(result[2]) && !_.isEmpty(result[2])? result[2] : '');
-			var isUnc = (!_.isEmpty(device) && charAt(device,2) NEQ ':');
-			var isAbsolute = (!isNull(result[3]) && !_.isEmpty(result[3]))? true : isUnc;
-			var tail = result[4];
-
-			if (!_.isEmpty(device) &&
-			  !_.isEmpty(resolvedDevice) &&
-			  lcase(device) NEQ lcase(resolvedDevice)) {
-			// This path points to another device so it is not applicable
-			continue;
-			}
-
-			if (_.isEmpty(resolvedDevice)) {
-				resolvedDevice = device;
-			}
-
-			if (!resolvedAbsolute) {
-			resolvedTail = tail & '\' & resolvedTail;
-			resolvedAbsolute = isAbsolute;
-			}
-
-			if (!_.isEmpty(resolvedDevice) && resolvedAbsolute) {
+		if(isWindows) {
+			for (var i = arrayLen(argsArr); i >= 0 && !resolvedAbsolute; i--) {
+				thePath = "";
 				
-				break;
+				if (i >= 1) {
+					thePath = arguments[i];
+					console.print("firstif path: " & serialize(thePath));
+				} else if (_.isEmpty(resolvedDevice)) {
+					thePath = expandPath('/');
+					console.print("secondif path: " & serialize(thePath));
+				} else {
+					// Windows has the concept of drive-specific current working
+					// directories. If we've resolved a drive letter but not yet an
+					// absolute path, get cwd for that drive. We're sure the device is not
+					// an unc path at this points, because unc paths are always absolute.
+					thePath = env.get('=' & resolvedDevice);
+					// Verify that a drive-local cwd was found and that it actually points
+					// to our drive. If not, default to the drive's root.
+					if (_.isEmpty(thePath) || mid(lcase(thePath),1,4) NEQ
+						lcase(resolvedDevice) & '\') {
+						thePath = resolvedDevice & '\';
+					}
+					console.print("thirdif path: " & serialize(thePath));
+				}
+
+				// Skip empty and invalid entries
+				if (!_.isString(thePath) || _.isEmpty(thePath)) {
+					continue;
+				}
+
+				//split the path to array
+				var result = splitDeviceRe.match(thePath);
+				var device = (!isNull(result[1]) && !_.isEmpty(result[1])? result[1] : '');
+				var isUnc = (!_.isEmpty(device) && device.charAt(1) NEQ ':');
+				var isAbsolute = (!isNull(result[2]) && !_.isEmpty(result[2]))? true : isUnc;
+				var tail = result[3];
+
+				if (!_.isEmpty(device) &&
+				!_.isEmpty(resolvedDevice) &&
+				lcase(device) NEQ lcase(resolvedDevice)) {
+					// This path points to another device so it is not applicable
+					continue;
+				}
+
+				if (_.isEmpty(resolvedDevice)) {
+					resolvedDevice = device;
+				}
+
+				if (!resolvedAbsolute) {
+					resolvedTail = tail & '\' & resolvedTail;
+					resolvedAbsolute = isAbsolute;
+				}
+
+				if (!_.isEmpty(resolvedDevice) && resolvedAbsolute) {
+					break;
+				}
 			}
-		}
 			// Replace slashes (in UNC share name) by backslashes
 			resolvedDevice = rereplace(resolvedDevice,"\/",'\',"ALL");
 			// At this point the path should be resolved to a full absolute path,
@@ -363,14 +364,25 @@ component accessors=true {
 		//windows only
 		if (isWindows) {
 			result = splitDeviceRe.match(arguments.filename);
-			writeDump(var=result,abort=true);
-				device = (!isNull(result[2])? result[2] : '') & ((!isNull(result[3]))? result[3] : '');
-				tail = ((!isNull(result[4]))? result[4] : '');
+			//console.print("result: " & serialize(result));
+				device = (!isNull(result[1])? result[1] : '') & ((!isNull(result[2]))? result[2] : '');
+				tail = ((!isNull(result[3]))? result[3] : '');
+			// console.print("device: " & serialize(device));
+			// console.print("tail: " & serialize(tail));
 			
 			result2 = splitTailRe.match(tail);
-				dir = ((!isNull(result2[2]))? result2[2] : '');
-				basename = ((!isNull(result2[3]))? result2[3] : '');
-				ext = ((!isNull(result2[4]))? result2[4] : '');
+			// console.print("result2: " & serialize(result2));
+			
+				dir = ((!isNull(result2[1]))? result2[1] : '');
+
+				// console.print("dir: " & serialize(dir));
+			
+				basename = ((!isNull(result2[2]))? result2[2] : '');
+				// console.print("basename: " & serialize(basename));
+			
+				ext = ((!isNull(result2[3]))? result2[3] : '');
+				// console.print("ext: " & serialize(ext));
+			
 
 			//writeDump(var=result,abort=true);
 		//posix only
@@ -459,8 +471,7 @@ component accessors=true {
 	};
 
 	public any function basename(path, ext = "") {
-		var f = splitPath(arguments.path);
-		writeDump(var=f,abort=true);
+		var f = splitPath(arguments.path)[3];
 		var theExt = arguments.ext;
 		if(!_.isEmpty(theext) AND right(f,len(theExt)) EQ theExt) {
 			f = left(f,len(f) - len(theExt));

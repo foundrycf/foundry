@@ -72,6 +72,7 @@ if (isWindows) {
     var result = splitDeviceRe.exec(filename),
         device = (result[1] || '') + (result[2] || ''),
         tail = result[3] || '';
+    console.log(result);
     // Split the tail into dir, basename and extension
     var result2 = splitTailRe.exec(tail),
         dir = result2[1] || '',

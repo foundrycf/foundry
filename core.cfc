@@ -17,10 +17,10 @@ component {
 	
 	property name="foundry_paths" type="array";
 
-	this.foundry_paths = [
-		expandPath("/"),
-		path.resolve(expandPath("/"),"../")
-	];
+	// this.foundry_paths = [
+	// 	expandPath("/"),
+	// 	path.resolve(expandPath("/"),"../")
+	// ];
 
 	public any function require(x){
 		var Path = new core.Path();

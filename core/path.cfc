@@ -38,10 +38,10 @@ component accessors=true {
 		if(isWindows) {
 	       	//split the path to array
 			var result = splitDeviceRe.match(thePath);
-			var device = (!isNull(result[2]) && !_.isEmpty(result[2])? result[2] : '');
-			var isUnc = (!_.isEmpty(device) && charAt(device,2) NEQ ':');
-			var isAbsolute = (!isNull(result[3]) && !_.isEmpty(result[3]))? true : isUnc;
-	        var tail = result[4];
+			var device = (!isNull(result[1]) && !_.isEmpty(result[1])? result[1] : '');
+			var isUnc = (!_.isEmpty(device) && charAt(device,1) NEQ ':');
+			var isAbsolute = (!isNull(result[2]) && !_.isEmpty(result[2]))? true : isUnc;
+	        var tail = result[3];
 	        var tester = new RegExp("[\\\/]$");
 			var trailingSlash = tester.test(tail);
 
@@ -143,6 +143,7 @@ component accessors=true {
 
 			//split the path to array
 			var result = splitDeviceRe.match(thePath);
+			console.log(result);
 			var device = (!isNull(result[2]) && !_.isEmpty(result[2])? result[2] : '');
 			var isUnc = (!_.isEmpty(device) && charAt(device,2) NEQ ':');
 			var isAbsolute = (!isNull(result[3]) && !_.isEmpty(result[3]))? true : isUnc;
@@ -362,6 +363,7 @@ component accessors=true {
 		//windows only
 		if (isWindows) {
 			result = splitDeviceRe.match(arguments.filename);
+			writeDump(var=result,abort=true);
 				device = (!isNull(result[2])? result[2] : '') & ((!isNull(result[3]))? result[3] : '');
 				tail = ((!isNull(result[4]))? result[4] : '');
 			
@@ -457,7 +459,8 @@ component accessors=true {
 	};
 
 	public any function basename(path, ext = "") {
-		var f = splitPath(arguments.path)[3];
+		var f = splitPath(arguments.path);
+		writeDump(var=f,abort=true);
 		var theExt = arguments.ext;
 		if(!_.isEmpty(theext) AND right(f,len(theExt)) EQ theExt) {
 			f = left(f,len(f) - len(theExt));

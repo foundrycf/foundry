@@ -4,90 +4,43 @@
 *
 */
 component {
-	variables.System = createObject("java","java.lang.System");
-	public any function init(opts = {}) {
+	public any function init(prefix = "",opts = {}) {
+		var jarPaths = [];
+		variables._ = new Util();
+		this.prefix = prefix;
+		jarPaths.add("/Users/rountrjf/Sites/foundry/deps/jansi-1.9.jar");
+		variables.loader = createObject("component","foundry.deps.javaloader.JavaLoader").init(jarPaths);
+    	//writeDump(var=ansi,abort=true);
+		variables.AnsiConsole = loader.create("org.fusesource.jansi.AnsiConsole");
+		variables.Ansi = loader.create("org.fusesource.jansi.Ansi").init();
+		this.Colors = loader.create("org.fusesource.jansi.Ansi$Color");
+		AnsiConsole.systemInstall();
+		variables.System = createObject("java","java.lang.System");
+		
 		return this;
 	}
 
 	public any function log(obj) {
-		savecontent variable="output" { writeDump(var=obj,format="text"); }
-    	return System.out.println("[" & timeFormat(now(),"hh:mm:ss") & "] " & removeHtml(output));
+		return print("[" & timeFormat(now(),"hh:mm:ss") & "] " & obj);
 	}
 
 	public any function info(obj) {
-		savecontent variable="output" { writeDump(var=obj,format="text"); }
-    	return System.out.println("INFO: " & removeHtml(output));
+    	return print("@|bold,white INFO|@ @|white " & obj & "|@");
 	}
 
 	public any function config(obj) {
-		savecontent variable="output" { writeDump(var=obj,format="text"); }
-    	return System.out.println("CONFIG: " & removeHtml(output));
+    	return print("@|bold,magenta CONFIG|@ @|magenta " & obj & "|@");
 	}
 
 	public any function error(obj) {
-		savecontent variable="output" { writeDump(var=obj,format="text"); }
-    	return System.out.println("ERROR: " & removeHtml(output));
+    	return print("@|bold,red ERROR|@ @|red " & obj & "|@");
 	}
 
 	public any function warning(obj) {
-		savecontent variable="output" { writeDump(var=obj,format="text"); }
-    	return System.out.println("WARN: " & removeHtml(output));
+    	return print("@|bold,yellow WARNING|@ @|yellow " & obj & "|@");
 	}
 
 	public any function print(str) {
-		return System.out.println(str);
-	}
-
-	//HELPERS
-	private any function removeHTML(source){
-		
-		// Remove all spaces becuase browsers ignore them
-		var result = ReReplace(trim(source), "[[:space:]]{2,}", " ","ALL");
-		
-		// Remove the header
-		result = ReReplace(result, "<[[:space:]]*head.*?>.*?</head>","", "ALL");
-		
-		// remove all scripts
-		result = ReReplace(result, "<[[:space:]]*script.*?>.*?</script>","", "ALL");
-		
-		// remove all styles
-		result = ReReplace(result, "<[[:space:]]*style.*?>.*?</style>","", "ALL");
-		
-		// insert tabs in spaces of <td> tags
-		result = ReReplace(result, "<[[:space:]]*td.*?>","	", "ALL");
-		
-		// insert line breaks in places of <BR> and <LI> tags
-		result = ReReplace(result, "<[[:space:]]*br[[:space:]]*>",chr(13), "ALL");
-		result = ReReplace(result, "<[[:space:]]*li[[:space:]]*>",chr(13), "ALL");
-		
-		// insert line paragraphs (double line breaks) in place
-		// if <P>, <DIV> and <TR> tags
-		result = ReReplace(result, "<[[:space:]]*div.*?>",chr(13), "ALL");
-		result = ReReplace(result, "<[[:space:]]*tr.*?>",chr(13), "ALL");
-		result = ReReplace(result, "<[[:space:]]*p.*?>",chr(13), "ALL");
-		
-		// Remove remaining tags like <a>, links, images,
-		// comments etc - anything thats enclosed inside < >
-		result = ReReplace(result, "<.*?>","", "ALL");
-		
-		// replace special characters:
-		result = ReReplace(result, "&nbsp;"," ", "ALL");
-		result = ReReplace(result, "&bull;"," * ", "ALL");    
-		result = ReReplace(result, "&lsaquo;","<", "ALL");        
-		result = ReReplace(result, "&rsaquo;",">", "ALL");        
-		result = ReReplace(result, "&trade;","(tm)", "ALL");        
-		result = ReReplace(result, "&frasl;","/", "ALL");        
-		result = ReReplace(result, "&lt;","<", "ALL");        
-		result = ReReplace(result, "&gt;",">", "ALL");        
-		result = ReReplace(result, "&copy;","(c)", "ALL");        
-		result = ReReplace(result, "&reg;","(r)", "ALL");    
-		
-		// Remove all others. More special character conversions
-		// can be added above if needed
-		result = ReReplace(result, "&(.{2,6});", "", "ALL");    
-		result = trim(result);
-		// Thats it.
-		return result;
-
+		return System.out.println(this.prefix & Ansi.ansi().render(str));
 	}
 }

@@ -1,12 +1,11 @@
 component name="fs" {
-	variables.console = new Console();
-	variables._ = new Util();
-	variables.path = new Path();
-	// public void function assertEncoding(encoding) {
-	// 	if (structKeyExists(arguments, 'encoding' && !Buffer.isEncoding(encoding)) {
-	// 		throw new Error('Unknown encoding: ' & encoding);
-	// 	}
-	// }
+	public any function init() {
+		variables._ = new Util();
+		variables.path = new Path();
+		variables.futil = createObject("java","org.apache.commons.io.FileUtils");
+
+		return this;
+	}
 
 	public any function exists(p,cb) {
 		if(fileExists(arguments.p)) {
@@ -209,32 +208,13 @@ component name="fs" {
 		return FileWriter;
 	}
 
-	public void function copyDir(required source,required destination,ignore = "",required nameconflict = "overwrite") {
-		var files = "";
-		if (not(directoryExists(arguments.destination))) {
-			//console.print("destPath doesn't exist, creating it");
-			directoryCreate(arguments.destination);
-		}
-
-		files = directoryList(path=arguments.source,recurse=false,listInfo="names");
-
-		for(file in files) {
-			var src = file;
-			var dest = path.join(destination,path.basename(file));
-
-			var info = getFileInfo(src);
-			if(info.type EQ 'file') {
-				// console.print("Copying file: #src#");
-				// console.print("to dest file: #dest#");
-				fileCopy(source=src,destination=dest)
-			} else if (info.type EQ 'dir') {
-				//console.print("Copying dir: #file.name#");
-				directoryCopy(src, dest);
-			}
-		}
-
-
+	public void function copyDir(required source,required destination) {
+		var src = createObject("java","java.io.File").init(arguments.source);
+		var dest = createObject("java","java.io.File").init(arguments.destination);
 		
+		if(directoryExists(source)) {
+			futil.copyDirectory(src,dest);		
+		}
 	}
 
 	// public any function writeFileSync(path, data, encoding) {

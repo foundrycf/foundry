@@ -126,6 +126,10 @@ component name="config" {
 	public void function validate() {
 		var requiredProps = "name,version";
 
+		if(!structKeyExists(this,'main')) {
+			this.main = "";
+		}
+
 		if(left(Path.basename(this.main),3) NEQ "cfc") {
 			this.main &= ".cfc";
 		}

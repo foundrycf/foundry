@@ -1,52 +1,40 @@
-component name="ChildProcess" extends="emitter" {
+component name="childprocess" extends="emitter" {
   property type="any" name="env";
 
-  public any function init(command,vargs = [],settings = {}) {
-    var args = [];
-    args.add(command);
-    args.addAll(vargs);
+  public any function init() {
+    var path = require("path");
+    var syscmdJar = [];
+    syscmdJar.add(path.resolve(path.dirname(getComponentMetaData(this).path),'../deps/systemcommand.jar'));
+    var loader = createObject("component","foundry.deps.javaloader.JavaLoader").init(syscmdJar);
+    variables.cmd = loader.create("au.com.webcode.util.SystemCommand");
+    
+    loader = "";
+    syscmdJar = "";
 
-    this.pb = createObject("java","java.lang.ProcessBuilder").init(args);
-    this.env = this.pb.environment();
-    if(structKeyExists(settings,'cwd')) {
-      var cwd = createObject("java","java.io.File").init(settings.cwd);
-      this.pb.directory(cwd);
-    }
-
-    this.on("exec",function() {
-      console.print("Running command...");
-    });
-
-    this.on("close",function() {
-      console.print("Exiting command...");
-    });
     return this;
   }
 
-  public any function exec() {
-    this.Process = this.pb.start();
-    this.OutputStream = this.Process.getOutputStream();
-    this.InputStream = this.Process.getInputStream();
-    this.ErrorStream = this.Process.getErrorStream();
-
-    this.emit("exec");
-  }
-
-  public any function stdout(str) {
-    this.OutputStream.println('test');
-  }
-
-  public any function stdin(str) {
+  public any function spawn(command,vargs = [], settings = {}) {
+    var args = [];
+    args.add(command);
+    args.addAll(vargs);
+    var cwd = "";
     
-  }
+    if(structKeyExists(settings,'cwd')) {
+     cwd = settings.cwd;
+    } else {
+      cwd = returnNull();
+    }
 
-  public any function stderr(str) {
+    var result = cmd.execute("#command# #arrayToList(vargs,' ')#",'10000',cwd);
     
-  }
+    return {
+      'stdout': result.getStandardOutput(),
+      'stderr': result.getErrorOutput()
+    };
+  };
 
-  public any function close() {
-    this.Process
+  private void function returnNull() {
 
-    this.emit("close");
   }
 }

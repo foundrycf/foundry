@@ -346,7 +346,9 @@ component accessors=true {
 		    // if(arrayLen(toParts) EQ 1 AND samePartsLength EQ 1) {
 		    // 	arrayDeleteAt(toParts,1);
 		    // }
-		    outputParts.addAll(jArrayUtils.subarray(toParts,samePartsLength,arrayLen(toParts)));
+		   // writeDump(var=,abort=true);
+		   var newParts = listToArray(arrayToList(jArrayUtils.subarray(toParts,samePartsLength,arrayLen(toParts))));
+		    outputParts.addAll(newParts);
 		    return ArrayToList(outputParts,'/');
     	// }
 	}
@@ -388,10 +390,10 @@ component accessors=true {
 		//posix only
 		} else {
 			result = splitPathRe.match(arguments.filename);
-			device = (!isNull(result[1])? result[1] : '');
-			dir = ((!isNull(result[2]))? result[2] : '');
-			basename = ((!isNull(result[3]))? result[3] : '');
-			ext = ((!isNull(result[4]))? result[4] : '');
+			device = (structKeyExists(result,1)? result[1] : '');
+			dir = ((structKeyExists(result,2))? result[2] : '');
+			basename = ((structKeyExists(result,3))? result[3] : '');
+			ext = ((structKeyExists(result,4))? result[4] : '');
 		};
 		return [device,dir,basename,ext];
 	}

@@ -2,7 +2,7 @@
 * @name RegExp
 * @hint a class representing a regular expression
 **/
-component name="RegExp" accessors=true {
+component accessors=true {
 	property type="string" 
 	name="pattern"
 	getter=true
@@ -49,7 +49,7 @@ component name="RegExp" accessors=true {
 	* REMatchGroups UDF
 	* @Author Ben Nadel <http://bennadel.com/>
 	*/
-	public array function match(text,scope = "all") {
+	public struct function match(text,scope = "all") {
 		var local = structnew();
 		local.results = ArrayNew(1);
 		local.GROUPS = {};
@@ -92,7 +92,7 @@ component name="RegExp" accessors=true {
 				var result = rereplaceNoCase(text,this.getPattern(),repResult);
 			}
 		} else {
-			var result = reReplaceNoCase(text,this.getPattern(),replacement)
+			var result = reReplaceNoCase(text,this.getPattern(),replacement);
 		}
 
 		return result;

@@ -1,7 +1,7 @@
 component name="fs" {
 	public any function init() {
-		variables._ = new Util();
-		variables.path = new Path();
+		// variables._ = new Util();
+		// variables.path = new Path();
 		variables.futil = createObject("java","org.apache.commons.io.FileUtils");
 
 		return this;
@@ -26,30 +26,29 @@ component name="fs" {
 	}
 
 	public any function readFile(p,charset = 'utf8',cb) {
-		var err = {};
 		var contents = "";
 		try {
 			contents = fileRead(p);
-		} catch(any err) {
-			cb(err, contents);
+		} catch(any errs) {
+			cb(errs, contents);
 			return false;
 		}
 
-		cb(err, contents);
+		cb(errs, contents);
 	}
 
 	public any function mkdir(p, mode = 0777, cb) {
 		var _ = new util();
 		var path = new path();
-  		var err = {};
 
   		if(_.isFunction(mode)) cb = mode;
   		
   		try{
-  			directoryCreate(path=path.resolve(expandPath('/'), p));
+  			dirPath = path.resolve(expandPath('/'), p);
+  			directoryCreate(dirPath);
   			FileSetAccessMode(path.resolve(expandPath('/'), p), mode);
-  		} catch(any err1) {
-  			cb(err1);
+  		} catch(any errs) {
+  			cb(errs);
   			return false;
   		}
 
@@ -110,7 +109,7 @@ component name="fs" {
 
 	public any function stat(p, cb) {
 		var path = new path();
-		var err = {};
+		var errs = {};
 		var contents = {
 				isFile: false,
 				isDirectory: false,
@@ -142,7 +141,7 @@ component name="fs" {
 			return false;
 		}
 		
-		cb(err, contents);
+		cb(errs, contents);
 	}
 
 	public any function statSync(path) {

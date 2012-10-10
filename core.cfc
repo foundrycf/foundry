@@ -47,12 +47,12 @@ component {
 		var cacheKey = getCacheKey(baseName,arguments);
 		var rargs = duplicate(arguments);
 
-		if(structKeyExists(variables,baseName) AND structKeyExists(request.foundry.cache,cacheKey)) return request.cache[cacheKey];
+		//if(structKeyExists(variables,baseName) AND structKeyExists(request.foundry.cache,cacheKey)) return request.cache[cacheKey];
 
 		structDelete(rargs,'x');
 
 		if(isCoreModule(x)) {
-			return _requireCore(x);
+			return createObj("component","foundry.core.#x#",rargs,cacheKey);
 		} else if (isPath) {
 			var thePath = path.resolve(path.dirname(y),x);
 			module = load_as_file(thePath,rargs,cacheKey);

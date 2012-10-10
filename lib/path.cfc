@@ -6,13 +6,15 @@
 component accessors=true {
 	property name="sep" type="string";
 
+	include "../core/util.cfm";
+	include "../core/require.cfm";
+
 	public any function init() {
 		variables.isWindows = (server.os.name CONTAINS "windows");
 		variables.jPath = createObject("java","org.apache.commons.io.FilenameUtils");
 		variables.jRegex = createObject("java","java.util.regex.Pattern");
 		variables.jArrayUtils = createObject("java","org.apache.commons.lang.ArrayUtils");
 		variables.system = CreateObject("java", "java.lang.System");
-		variables._ = createObject("component","foundry.core.util").init(this);
 		variables.env = system.getenv();
 		//variables._  = require("util");
 		//variables.console = new console();

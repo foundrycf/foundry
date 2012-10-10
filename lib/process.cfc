@@ -1,7 +1,7 @@
 component {
 	
 	public any function init() {
-		//variables.system = CreateObject("java", "java.lang.System");
+		variables.system = CreateObject("java", "java.lang.System");
 
 		return this;
 	}

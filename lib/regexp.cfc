@@ -10,6 +10,7 @@ component accessors=true {
 
 	public any function init(required pattern, global = false, insensitive = false) {
 		this.setPattern(arguments.pattern);
+		include "../core/util.cfm";
 		this.insensitive = arguments.insensitive;
 		this.global = arguments.global;
 		//this.isEmpty = createObject("component","foundry.core.util").init().isEmpty;

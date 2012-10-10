@@ -1,18 +1,14 @@
-component name="my_module" extends="Foundry.Module" {
-	public any function doSomething() {
-		return true;
-	}
-
-	public any function requires_fake_module1() {
-		var Path = require("path");
+component name="my_module" extends="foundry.lib.module" {
+	public any function init() {
 		var fake_module1 = require("fake_module1");
-		return false;
-	}
+		mixin("emitter");
+		this.emitter_init();
+		//variables.emitter = require("emitter");
 
-	public any function getMeSomething() {
-		return {
-			"something":1,
-			"somethingElse":"Nope!"
-		};
+		this.on("test",function() {
+			writeOutput("test called!");
+		});
+
+		return this;
 	}
 }

@@ -1,6 +1,5 @@
 component name="config" {
 	/**
-	* @name name
 	* @type string
 	* @required true
 	* @hint The unique name of your package.
@@ -8,7 +7,6 @@ component name="config" {
 	property name="name";
 
 	/**
-	* @name preferGlobal
 	* @type boolean
 	* @required false
 	* @hint Flag that indicates this package prefers to be installed globally for all your apps.
@@ -16,7 +14,6 @@ component name="config" {
 	property name="preferGlobal";
 
 	/**
-	* @name version
 	* @type boolean
 	* @required false
 	* @hint Version of the package as specified by <a href="http://semver.org/">Semantic Versioning</a>.
@@ -24,7 +21,6 @@ component name="config" {
 	property name="version";
 
 	/**
-	* @name author
 	* @type string
 	* @required false
 	* @hint The author of the project.
@@ -32,7 +28,6 @@ component name="config" {
 	property name="author";
 
 	/**
-	* @name description
 	* @type string
 	* @required false
 	* @hint The description of the project.
@@ -40,7 +35,6 @@ component name="config" {
 	property name="description";
 
 	/**
-	* @name contributors
 	* @type array
 	* @required false
 	* @hint An array of structures representing contributors to the project.
@@ -48,7 +42,6 @@ component name="config" {
 	property name="contributors";
 
 	/**
-	* @name bin
 	* @type struct
 	* @required false
 	* @hint A structure containing key/pair mappings of binary script names and cf script paths. 
@@ -56,7 +49,6 @@ component name="config" {
 	property name="bin";
 
 	/**
-	* @name scripts
 	* @type string
 	* @required false
 	* @hint A structure containing key/pair mappings of foundry modules and cf script paths. 
@@ -64,7 +56,6 @@ component name="config" {
 	property name="scripts";
 
 	/**
-	* @name main
 	* @type string
 	* @required false
 	* @hint The main entry point of the package.<br /><br />When calling require('module_name') in Foundry this is the file that will actually be required.
@@ -72,7 +63,6 @@ component name="config" {
 	property name="main";
 
 	/**
-	* @name repository
 	* @type struct
 	* @required false
 	* @hint A structure containing key/pair mappings of source code repositories. 
@@ -81,7 +71,6 @@ component name="config" {
 	property name="repository";
 
 	/**
-	* @name keywords
 	* @type array
 	* @required false
 	* @hint An array of keywords which describe your package. Useful for people searching the fpmcf.org registry.
@@ -89,7 +78,6 @@ component name="config" {
 	property name="keywords";
 
 	/**
-	* @name dependencies
 	* @type struct
 	* @required false
 	* @hint A structure containing key/pair mappings of foundry packages and versions that this project depends on. 
@@ -98,7 +86,6 @@ component name="config" {
 	property name="dependencies";
 
 	/**
-	* @name license
 	* @type string
 	* @required false
 	* @hint The license which you prefer to release your project under.<br /><br /><a href="http://en.wikipedia.org/wiki/MIT_License">MIT</a> is a good choice.
@@ -106,7 +93,6 @@ component name="config" {
 	property name="license";
 
 	/**
-	* @name engines
 	* @type struct
 	* @required false
 	* @hint A struct containing key/pair mappings of engine versions.<br /><br />This is used to specify the versions of CFML and Foundry your package is known to work correctly with.
@@ -117,6 +103,7 @@ component name="config" {
 	public any function init(params) {
 		structAppend(this,params,true);
 		variables.Path = new Path();
+		
 		this.validate();
 
 		return this;
@@ -124,6 +111,10 @@ component name="config" {
 
 	public void function validate() {
 		var requiredProps = "name,version";
+
+		if(!structKeyExists(this,'main')) {
+			this.main = "";
+		}
 
 		if(left(Path.basename(this.main),3) NEQ "cfc") {
 			this.main &= ".cfc";

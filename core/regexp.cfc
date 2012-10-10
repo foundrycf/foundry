@@ -2,7 +2,7 @@
 * @name RegExp
 * @hint a class representing a regular expression
 **/
-component name="RegExp" accessors=true {
+component accessors=true {
 	property type="string" 
 	name="pattern"
 	getter=true
@@ -12,14 +12,14 @@ component name="RegExp" accessors=true {
 		this.setPattern(arguments.pattern);
 		this.insensitive = arguments.insensitive;
 		this.global = arguments.global;
-		variables.console = new foundry.core.Console();
+		//this.isEmpty = createObject("component","foundry.core.util").init().isEmpty;
+		//variables.console = new foundry.core.Console();
 
 		return this;
 	}
 
 	public any function test(str) {
 		var matches = {};
-
 		if(this.insensitive) {
 			matches = this.match(arguments.str);
 		} else {
@@ -29,7 +29,7 @@ component name="RegExp" accessors=true {
 		if(structCount(matches) GT 0) {
 			return true;
 		} else {
-			matches = REMatch(this.getPattern(),arguments.str);
+			matches = REMatchNoCase(this.getPattern(),arguments.str);
 
 			if(arrayLen(matches) GT 0) {
 			
@@ -49,7 +49,7 @@ component name="RegExp" accessors=true {
 	* REMatchGroups UDF
 	* @Author Ben Nadel <http://bennadel.com/>
 	*/
-	public array function match(text,scope = "all") {
+	public struct function match(text,scope = "all") {
 		var local = structnew();
 		local.results = ArrayNew(1);
 		local.GROUPS = {};
@@ -74,7 +74,28 @@ component name="RegExp" accessors=true {
 	}
 
 	public any function replace(text,replacement) {
-		return reReplaceNoCase(text,this.getPattern(),replacement);
+		var result = text;
+
+		if(_.isFunction(replacement)) {
+			var matches = this.match(text);
+			if(structCount(matches) GT 0) {
+				var args = [];
+				for(var i=0; i <= structCount(matches); i++) {
+					if(structKeyExists(matches,i)) {
+						var match = matches[i];
+					} else {
+						var match = "";
+					}
+					args.add(match);
+				}
+				var repResult = replacement(argumentCollection=arrayCollection(args));
+				var result = rereplaceNoCase(text,this.getPattern(),repResult);
+			}
+		} else {
+			var result = reReplaceNoCase(text,this.getPattern(),replacement);
+		}
+
+		return result;
 	}
 
 	/**
@@ -94,6 +115,23 @@ component name="RegExp" accessors=true {
 		};
 
 		return local.result;
+	}
+
+	/**
+	* arrayCollection UDF
+	*  @Author Ben Nadel <http://bennadel.com/>
+	*/
+	public struct function arrayCollection(array arr) {
+		var local = {};
+		local.keys = createObject( "java", "java.util.LinkedHashMap" ).init();
+
+		for(var i=1; i <= arrayLen(arguments.arr); i++) {
+			if (arrayIsDefined( arguments.arr, i)) {
+				local.keys.put(javaCast( "string", i),arguments.arr[i]);
+			};
+		};
+	 
+		return local.keys;
 	}
 
 }

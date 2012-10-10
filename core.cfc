@@ -7,62 +7,63 @@
 * Foundry modules into your applications.
 */
 component {
-	//persist & cache
-	application['foundry'] = (structKeyExists(application,'foundry'))? application.foundry : {};
-	application.foundry['cache'] = (structKeyExists(application.foundry,'cache'))? application.foundry.cache : {};
-	
-	variables.core_modules = "path,regexp,console,process,struct,arrayobj,util,url,fs,emitter,event";
-	variables.Path = new core.Path();
-	variables._ = new core.util();
-	
 	property name="foundry_paths" type="array";
 
-	this.foundry_paths = [
-		expandPath("/"),
-		path.resolve(expandPath("/"),"../")
-	];
+	//persist & cache
+	request['foundry'] = (structKeyExists(request,'foundry'))? request.foundry : {};
+	request.foundry['cache'] = (structKeyExists(request.foundry,'cache'))? request.foundry.cache : {};
+	
+	variables.core_modules = "path,regexp,console,process,struct,arrayobj,util,url,fs,childprocess,emitter,event";
+	//variables.process = createObject("component","foundry.core.process").init();
+	private any function _requireCore(moduleid) {
+		return createObject("core.#moduleid#").init();
+	}
 
-	public any function require(x){
-		var Path = new core.Path();
+	this.path = createObject("component","core.path").init();
+	this.regexp = createObject("component","core.regexp");
+	this.console = createObject("component","core.console");
+	this.process = createObject("component","core.process");
+	this.util = createObject("component","core.util");
+
+	public any function require(x/*,args*/){
+		variables.path = this.path;
+		//writeDump(var=path,abort=true);
+		//variables._ = _requireCore("util");
 		var debug = false;
-		if(debug) {
-			variables.console = new core.Console();
-		} else {
-			variables.console =  {};
-			variables.console.log = function() { return true; };
-		}
-		var cleanPath = Path.normalize(x);
+		//var metaData = getComponentMetaData(this);
+		var cleanPath = path.normalize(x);
 		var parts = Path.splitPath(x);
 		var isRelative = !Path.isAbsolute(x);
 		var pathSep = Path.getSep();
 		var isPath = (path.fixSeps(x) CONTAINS pathSep);
-		var y = getComponentMetaData(this).path;
+		var y = getCurrentTemplatePath();
+		var yRel = replace(y,expandPath('/'),'');
+		//writeDump(var=yRel,abort=true);
 		var fullPath = Path.join(Path.dirname(y),x);
 		var module = {};
 		var modules_path = path.join(expandPath('/'),'foundry_modules');
-		// 1. If X is a core module,
-		//    a. return the core module
-		//    b. STOP
-		// 2. If X begins with './' or '/' or '../'
-		//    a. LOAD_AS_FILE(Y + X)
-		//    b. LOAD_AS_DIRECTORY(Y + X)
-		// 3. LOAD_FOUNDRY_MODULES(X, dirname(Y))
-		// 4. THROW "not found"
-		//console.log("fullPath: " & fullPath);
+
+		var baseName = path.basename(x);
+		var cacheKey = getCacheKey(baseName,arguments);
+		var rargs = duplicate(arguments);
+
+		//if(structKeyExists(variables,baseName) AND structKeyExists(request.foundry.cache,cacheKey)) return request.cache[cacheKey];
+
+		structDelete(rargs,'x');
+
 		if(isCoreModule(x)) {
-			console.log("[CORE_MODULE] " & cleanPath);
-			return createObject("component","core.#cleanPath#");
+			return createObj("component","foundry.core.#x#",rargs,cacheKey);
 		} else if (isPath) {
 			var thePath = path.resolve(path.dirname(y),x);
-			console.log("[PATH] " & thePath);
-
-			module = load_as_file(thePath);
+			module = load_as_file(thePath,rargs,cacheKey);
 			if(!isDefined("module")) {
-				module = load_as_directory(thePath);
+				module = load_as_directory(thePath,rargs,cacheKey);
 			}
 		} else {
-			console.log("[MODULE] " & x);
-			module = load_foundry_modules(x,Path.dirname(y));
+			// writeDump(var=x);
+			// writeDump(var=path.dirname(y));
+			// writeDump(var=path.relative(path.join(expandPath('/foundry_modules/'),x),path.dirname(y)),abort=true);
+			module = load_foundry_modules(x,Path.dirname(y),rargs,cacheKey);
 		}
 
 		if(!isDefined("module")) {
@@ -71,52 +72,50 @@ component {
 
 		return module;
 	}
+
 	private any function isCoreModule(x) {
 		if(listFindNoCase(core_modules,x)) return true;
 
 		return false;
 	}
 
-	private any function load_as_file(x) {
+	private any function isCached(x) {
+		if(structKeyExists(request.foundry.cache,x)) {
+			return true;
+		}
+
+		return false;
+	}
+
+	private any function load_as_file(x,rargs = {},cacheKey = "") {
 		var compPath = getCompPath(x);
-		
-		console.log("load as file: " & x);
 		var xWithCFC = (right(x,4) EQ ".cfc")? x : x & ".cfc";
 		var xWithCFM = (right(x,4) EQ ".cfm" AND right(x,4) EQ ".cfc")? x : replace(x,'.cfc','') & ".cfm";
 
 		if(isFile(x)) {
-			return createObject("component",compPath);
+			return createObj("component",x,rargs,cacheKey);
 		} else if (isFile(xWithCFC)) {
-			console.log("-----[LOAD_FILE] #xWithCFC#");
-			return compPath;
+			return createObj("component",x,rargs,cacheKey);
 		} else if (isFile(xWithCFM)) {
-			console.log("-----[LOAD_FILE] #xWithCFM#");
 			return fileRead(x);
 		}
 	}
 
-	private any function load_as_directory(x) {
-		// 1. If X/foundry.json is a file,
-		//    a. Parse X/foundry.json, and look for "main" field.
-		//    b. let M = X + (json main field)
-		//    c. LOAD_AS_FILE(M)
-		// 2. If X/index.cfc is a file, load X/index.cfc as JavaScript text.  STOP
-		// 3. If X/index.cfm is a file, load X/index.cfm as binary addon.  STOP
+	private any function load_as_directory(x,rargs = {},cacheKey = "") {
 		var configFile = Path.join(x,"foundry.json");
 		
 		var indexCFCPath = Path.join(x, "/index.cfc");
 		var indexCfmPath = Path.join(x, "/index.cfm");
 
-		console.log("load_as_directory(#x#)");
 		if(isFile(configFile)) {
 			var configContent = deserializeJson(fileRead(configFile));
 
 			var config = new core.config(configContent);
 			var m = Path.resolve(Path.dirname(configFile), config.main);
 			
-			return load_as_file(m);
+			return load_as_file(m,rargs,cacheKey);
 		} else if (isFile(indexCFCPath)) {
-			return createObject("component",getCompPath(indexCFCPath));
+			return createObj("component",indexCFCPath,rargs,cacheKey);
 		} else if (isFile(indexCFMPath)) {
 			return fileRead(indexCfmPath);
 		} else {
@@ -124,48 +123,32 @@ component {
 		}
 	}
 
-	private any function load_foundry_modules(x,start) {
-		// 1. let DIRS=FOUNDRY_MODULES_PATHS(START)
-		// 2. for each DIR in DIRS:
-		// 	a. LOAD_AS_FILE(DIR/X)
-		// 	b. LOAD_AS_DIRECTORY(DIR/X)
+	private any function load_foundry_modules(x,start,rargs,cacheKey) {
 		var fullPath = "";
 		var module_path = foundry_modules_paths(start);
 
 		fullPath = Path.join(module_path,x);
-		console.log("load_foundry_modules: " & fullPath);
 		if(isDir(fullPath)) {
-			return load_as_directory(fullPath);
+			return load_as_directory(fullPath,rargs,cacheKey);
 		} else if (isFile(fullPath)) {
-			return load_as_file(fullPath);
+			return load_as_file(fullPath,rargs,cacheKey);
 		}
 	}
 
 	private any function foundry_modules_paths(start) {
-		// 1. let PARTS = path split(START)
-		// 2. let ROOT = index of first instance of "foundry_modules" in PARTS, or 0
-		// 3. let I = count of PARTS - 1
-		// 4. let DIRS = []
-		// 5. while I > ROOT,
-		//    a. if PARTS[I] = "foundry_modules" CONTINUE
-		//    c. DIR = path join(PARTS[0 .. I] + "foundry_modules")
-		//    b. DIRS = DIRS + DIR
-		//    c. let I = I - 1
-		// 6. return DIRS
 		var currPath = start;
 		var nextPath = path.resolve(currPath,'../');
 		var root = false;
-		var rootPath = path.fixSeps(expandPath("/")).replaceFirst("[\\\/]{1}$","");
-		var dirs = directoryList(path=currPath,listInfo="name");
+		var rootPath = rereplace(path.fixSeps(expandPath("/")),"[\\\/]{1}$","");
+		var xdirs = directoryList(currPath);
 		var foundryPaths = [];
 
 		if(rootPath EQ currPath) {
 			root = true;
 		};
 
-		foundryPaths = arrayFilter(dirs,function(x) {
+		foundryPaths = arrayFilter(xdirs,function(x) {
 			if(x CONTAINS "foundry_modules") {
-				console.log("found: #x#");
 				return true;
 			} else {
 				return false;
@@ -186,8 +169,57 @@ component {
 		return replace(Path.relative(expandPath("/"),cleanPath),sep,".","ALL");
 	}
 
-	private void function cacheModule() {
+	private any function createObj(objType,objPath,rargs = {},ckey = "") {
+		var obj = {};
+		var cacheKey = (len(trim(ckey)) GT 0)? ckey : getCacheKey(path.basename(objPath),rargs);
+		if(structCount(rargs) GT 0) {
+			new_rargs = {};
+			for(var i = 1; i <= structCount(rargs)+1; i++) {
+				if(structKeyExists(rargs,i)) {
+					new_rargs['#i-1#'] = rargs[i];
+				}
+			}
+			rargs = new_rargs;
+		}
 
+		if(len(trim(cacheKey)) GT 0 AND isCached(cacheKey)) {
+			//console.warning("Loading From Cache: #cacheKey#");
+			obj = request.foundry['cache'][cacheKey];
+		} else {
+			//console.error("Not Cached: #objPath#");
+			obj = createObject(objType,getCompPath(objPath));
+			
+			if(compHasInit(getCompPath(objPath))) {
+				obj = obj.init(argumentCollection=rargs);
+			}
+
+			if(len(trim(cacheKey)) GT 0 AND isDefined("obj")) {
+				request.foundry['cache'][cacheKey] = obj;
+			}
+		}
+
+		return isDefined("obj")? obj : {};
+	}
+
+	private boolean function compHasInit(objPath) {
+		var hasInit = false;
+
+		var objInfo = getComponentMetaData(objPath);
+
+		if(structKeyExists(objInfo,'functions')) {
+			for(func in objInfo.functions) {
+				if(func.name EQ "init") {
+					hasInit = true;
+					break;
+				}
+			}
+		}
+
+		return hasInit;
+	}
+
+	private string function getCacheKey(moduleid,args) {
+		return moduleid & "_" & LCase(HASH("#moduleid#_" & serializeJson(args),"MD5","UTF-8"));
 	}
 
 	private string function checkForInit(x) {
@@ -203,8 +235,6 @@ component {
 	}
 
 	private boolean function isFile(x) {
-		console.log("isFile: " & x);
-		
 		if(fileExists(x)) {
 			var fileInfo = getFileInfo(x);
 
@@ -215,7 +245,6 @@ component {
 	}
 
 	private boolean function isDir(x) {
-		//console.log("isDir: " & x);
 		if(directoryExists(x)) {
 			var fileInfo = getFileInfo(x);
 
@@ -223,6 +252,7 @@ component {
 		}
 		return false;
 	}
+
 
 	public any function noop() {};
 

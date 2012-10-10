@@ -1,5 +1,10 @@
-component name="foundry.core.process" {
-	variables.system = CreateObject("java", "java.lang.System");
+component {
+	
+	public any function init() {
+		//variables.system = CreateObject("java", "java.lang.System");
+
+		return this;
+	}
 
 	public any function env(x) {
 		return system.getenv().get(x);

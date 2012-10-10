@@ -25,6 +25,13 @@ component name="fs" {
 		return false;
 	}
 
+	public boolean function isSymLink(p) {
+		var jFileUtil = createObject("java","org.apache.commons.io.FileUtils");
+		var jFile = createObject("java", "java.io.File").init(expandPath("../temp-files"));
+
+		return jFileUtil.isSymLink(jFile);
+	}
+
 	public any function readFile(p,charset = 'utf8',cb) {
 		var err = {};
 		var contents = "";
@@ -114,6 +121,7 @@ component name="fs" {
 		var contents = {
 				isFile: false,
 				isDirectory: false,
+				isSymLink: false,
 				mode: '',
 				size: 0 };
 
@@ -136,6 +144,7 @@ component name="fs" {
 
 			contents.isFile = (tmpContents.type EQ 'file') ? true : false;
 			contents.isDirectory = (tmpContents.type EQ 'directory') ? true : false;
+			contents.isSymLink = isSymLink(p);
 
 		} catch(any err) {
 			cb(err, contents);

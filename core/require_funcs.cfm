@@ -1,19 +1,19 @@
 <cfscript>
-var isCoreModule = function(x) {
+isCoreModule = function(x) {
 	if(listFindNoCase(core_modules,x)) return true;
 
 	return false;
-}
+};
 
-var isCached = function(x) {
+isCached = function(x) {
 	if(structKeyExists(request.foundry.cache,x)) {
 		return true;
 	}
 
 	return false;
-}
+};
 
-var load_as_file = function(x,rargs = {},cacheKey = "") {
+load_as_file = function(x,rargs = {},cacheKey = "") {
 	var compPath = getCompPath(x);
 	var xWithCFC = (right(x,4) EQ ".cfc")? x : x & ".cfc";
 	var xWithCFM = (right(x,4) EQ ".cfm" AND right(x,4) EQ ".cfc")? x : replace(x,'.cfc','') & ".cfm";
@@ -25,9 +25,9 @@ var load_as_file = function(x,rargs = {},cacheKey = "") {
 	} else if (isFile(xWithCFM)) {
 		return fileRead(x);
 	}
-}
+};
 
-var load_as_directory = function(x,rargs = {},cacheKey = "") {
+load_as_directory = function(x,rargs = {},cacheKey = "") {
 	var configFile = Path.join(x,"foundry.json");
 	
 	var indexCFCPath = Path.join(x, "/index.cfc");
@@ -47,9 +47,9 @@ var load_as_directory = function(x,rargs = {},cacheKey = "") {
 	} else {
 		return false;
 	}
-}
+};
 
-var load_foundry_modules = function(x,start,rargs,cacheKey) {
+load_foundry_modules = function(x,start,rargs,cacheKey) {
 	var fullPath = "";
 	var module_path = foundry_modules_paths(start);
 
@@ -59,9 +59,9 @@ var load_foundry_modules = function(x,start,rargs,cacheKey) {
 	} else if (isFile(fullPath)) {
 		return load_as_file(fullPath,rargs,cacheKey);
 	}
-}
+};
 
-var foundry_modules_paths = function(start) {
+foundry_modules_paths = function(start) {
 	var currPath = start;
 	var nextPath = path.resolve(currPath,'../');
 	var root = false;
@@ -86,17 +86,17 @@ var foundry_modules_paths = function(start) {
 	} else {
 		return path.join(currPath,'foundry_modules',foundryPaths);
 	}
-}
+};
 
-var getCompPath = function(x) {
+getCompPath = function(x) {
 	var cleanPath = replace(Path.normalize(x),".cfc","");
 	var sep = Path.sep();
 	cleanPath = Path.relative(expandPath("/"),cleanPath);
 	cleanPath = replace(cleanPath,"../","","ALL");
 	return replace(Path.relative(expandPath("/"),cleanPath),sep,".","ALL");
-}
+};
 
-var createObj = function(objType,objPath,rargs = {},ckey = "") {
+createObj = function(objType,objPath,rargs = {},ckey = "") {
 	var obj = {};
 	var cacheKey = (len(trim(ckey)) GT 0)? ckey : getCacheKey(path.basename(objPath),rargs);
 	if(structCount(rargs) GT 0) {
@@ -126,9 +126,9 @@ var createObj = function(objType,objPath,rargs = {},ckey = "") {
 	}
 
 	return isDefined("obj")? obj : {};
-}
+};
 
-var compHasInit = function(objPath) {
+compHasInit = function(objPath) {
 	var hasInit = false;
 
 	var objInfo = getComponentMetaData(objPath);
@@ -143,13 +143,13 @@ var compHasInit = function(objPath) {
 	}
 
 	return hasInit;
-}
+};
 
-var getCacheKey = function(moduleid,args) {
+getCacheKey = function(moduleid,args) {
 	return moduleid & "_" & LCase(HASH("#moduleid#_" & serializeJson(args),"MD5","UTF-8"));
-}
+};
 
-var checkForInit = function(x) {
+checkForInit = function(x) {
 	var data = getMetaData(x);
 	var constructorNames = "init";
 	for (func in data.functions) {
@@ -159,9 +159,9 @@ var checkForInit = function(x) {
 	}
 
 	return false;
-}
+};
 
-var isFile = function(x) {
+isFile = function(x) {
 	if(fileExists(x)) {
 		var fileInfo = getFileInfo(x);
 
@@ -169,20 +169,20 @@ var isFile = function(x) {
 	}
 
 	return false;
-}
+};
 
-var isDir = function(x) {
+isDir = function(x) {
 	if(directoryExists(x)) {
 		var fileInfo = getFileInfo(x);
 
 		if(fileInfo.type EQ "directory") return true;
 	}
 	return false;
-}
+};
 
-var _requireCore = function(moduleid) {
+_requireCore = function(moduleid) {
 	return createObject("component","core.#moduleid#").init();
-}
+};
 
-var noop = function() {};
+noop = function() {};
 </cfscript>

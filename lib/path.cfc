@@ -282,7 +282,7 @@ component accessors=true {
 		    var samePartsLength = length;
 		    
 		    for (var i = 1; i < length; i++) {
-		      if (lowerFromParts[i] !== lowerToParts[i]) {
+		      if (lowerFromParts[i] NEQ lowerToParts[i]) {
 		        samePartsLength = i;
 		        break;
 		      }

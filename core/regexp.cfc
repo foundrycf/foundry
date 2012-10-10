@@ -12,8 +12,8 @@ component accessors=true {
 		this.setPattern(arguments.pattern);
 		this.insensitive = arguments.insensitive;
 		this.global = arguments.global;
-		variables._ = new foundry.core.util();
-		variables.console = new foundry.core.Console();
+		//this.isEmpty = createObject("component","foundry.core.util").init().isEmpty;
+		//variables.console = new foundry.core.Console();
 
 		return this;
 	}

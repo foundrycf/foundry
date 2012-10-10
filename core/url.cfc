@@ -1,4 +1,7 @@
 component name="url" {
+	public any function init() {
+		return this;
+	}
 	/**
 	 * Parses a Url and returns a struct with keys defining the information in the Uri.
 	 * 

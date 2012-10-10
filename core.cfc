@@ -14,44 +14,55 @@ component {
 	request.foundry['cache'] = (structKeyExists(request.foundry,'cache'))? request.foundry.cache : {};
 	
 	variables.core_modules = "path,regexp,console,process,struct,arrayobj,util,url,fs,childprocess,emitter,event";
-	variables.Path = new core.Path();
-	variables._ = new core.util();
-	
-	
-	// this.foundry_paths = [
-	// 	expandPath("/"),
-	// 	path.resolve(expandPath("/"),"../")
-	// ];
+	//variables.process = createObject("component","foundry.core.process").init();
+	private any function _requireCore(moduleid) {
+		return createObject("core.#moduleid#").init();
+	}
+
+	this.path = createObject("component","core.path").init();
+	this.regexp = createObject("component","core.regexp");
+	this.console = createObject("component","core.console");
+	this.process = createObject("component","core.process");
+	this.util = createObject("component","core.util");
 
 	public any function require(x/*,args*/){
+		variables.path = this.path;
+		//writeDump(var=path,abort=true);
+		//variables._ = _requireCore("util");
 		var debug = false;
 		//var metaData = getComponentMetaData(this);
-		var cleanPath = Path.normalize(x);
+		var cleanPath = path.normalize(x);
 		var parts = Path.splitPath(x);
 		var isRelative = !Path.isAbsolute(x);
 		var pathSep = Path.getSep();
 		var isPath = (path.fixSeps(x) CONTAINS pathSep);
 		var y = getCurrentTemplatePath();
+		var yRel = replace(y,expandPath('/'),'');
+		//writeDump(var=yRel,abort=true);
 		var fullPath = Path.join(Path.dirname(y),x);
 		var module = {};
 		var modules_path = path.join(expandPath('/'),'foundry_modules');
 
 		var baseName = path.basename(x);
-		var cacheKey = baseName & "_" & LCase(HASH(serializeJson(arguments),"MD5","UTF-8"));
+		var cacheKey = getCacheKey(baseName,arguments);
 		var rargs = duplicate(arguments);
+
+		if(structKeyExists(variables,baseName) AND structKeyExists(request.foundry.cache,cacheKey)) return request.cache[cacheKey];
 
 		structDelete(rargs,'x');
 
 		if(isCoreModule(x)) {
-			return createObj("component",path.join("core",x),rargs,cacheKey);
+			return _requireCore(x);
 		} else if (isPath) {
 			var thePath = path.resolve(path.dirname(y),x);
-			
 			module = load_as_file(thePath,rargs,cacheKey);
 			if(!isDefined("module")) {
 				module = load_as_directory(thePath,rargs,cacheKey);
 			}
 		} else {
+			// writeDump(var=x);
+			// writeDump(var=path.dirname(y));
+			// writeDump(var=path.relative(path.join(expandPath('/foundry_modules/'),x),path.dirname(y)),abort=true);
 			module = load_foundry_modules(x,Path.dirname(y),rargs,cacheKey);
 		}
 
@@ -158,9 +169,9 @@ component {
 		return replace(Path.relative(expandPath("/"),cleanPath),sep,".","ALL");
 	}
 
-	private any function createObj(objType,objPath,rargs = {},cacheKey) {
+	private any function createObj(objType,objPath,rargs = {},ckey = "") {
 		var obj = {};
-
+		var cacheKey = (len(trim(ckey)) GT 0)? ckey : getCacheKey(path.basename(objPath),rargs);
 		if(structCount(rargs) GT 0) {
 			new_rargs = {};
 			for(var i = 1; i <= structCount(rargs)+1; i++) {
@@ -205,6 +216,10 @@ component {
 		}
 
 		return hasInit;
+	}
+
+	private string function getCacheKey(moduleid,args) {
+		return moduleid & "_" & LCase(HASH("#moduleid#_" & serializeJson(args),"MD5","UTF-8"));
 	}
 
 	private string function checkForInit(x) {

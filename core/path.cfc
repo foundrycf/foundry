@@ -4,26 +4,28 @@
 * @author Joshua F. Rountree (http://www.joshuairl.com/)
 */
 component accessors=true {
-	property name="sep"
-	type="string";
-	
-	variables.isWindows = (server.os.name CONTAINS "windows");
-	variables._ = new util();
-	variables.jPath = createObject("java","org.apache.commons.io.FilenameUtils");
-	variables.jRegex = createObject("java","java.util.regex.Pattern");
-	variables.jArrayUtils = createObject("java","org.apache.commons.lang.ArrayUtils");
-	variables.system = CreateObject("java", "java.lang.System");
-	variables.env = system.getenv();
-	variables.console = new console();
-	//windows regex
-	variables.splitDeviceRe = new RegExp("^([a-zA-Z]:|[\\/]{2}[^\\\/]+[\\\/][^\\\/]+)?([\\\/])?([\s\S]*?)$");
-	variables.splitTailRe = new RegExp("^([\s\S]+[\\\/](?!$)|[\\\/])?((?:\.{1,2}$|[\s\S]+?)?(\.[^.\/\\]*)?)$");
-	
-	//posix regex
-	variables.splitPathRe = new RegExp("^(\/?)([\s\S]+\/(?!$)|\/)?((?:\.{1,2}$|[\s\S]+?)?(\.[^.\/]*)?)$");
-	
-	this.setSep(sep());
-	return this;
+	property name="sep" type="string";
+
+	public any function init() {
+		variables.isWindows = (server.os.name CONTAINS "windows");
+		variables.jPath = createObject("java","org.apache.commons.io.FilenameUtils");
+		variables.jRegex = createObject("java","java.util.regex.Pattern");
+		variables.jArrayUtils = createObject("java","org.apache.commons.lang.ArrayUtils");
+		variables.system = CreateObject("java", "java.lang.System");
+		variables._ = createObject("component","foundry.core.util").init(this);
+		variables.env = system.getenv();
+		//variables._  = require("util");
+		//variables.console = new console();
+		//windows regex
+		variables.splitDeviceRe = new RegExp("^([a-zA-Z]:|[\\/]{2}[^\\\/]+[\\\/][^\\\/]+)?([\\\/])?([\s\S]*?)$");
+		variables.splitTailRe = new RegExp("^([\s\S]+[\\\/](?!$)|[\\\/])?((?:\.{1,2}$|[\s\S]+?)?(\.[^.\/\\]*)?)$");
+		
+		//posix regex
+		variables.splitPathRe = new RegExp("^(\/?)([\s\S]+\/(?!$)|\/)?((?:\.{1,2}$|[\s\S]+?)?(\.[^.\/]*)?)$");
+		
+		this.setSep(sep());
+		return this;
+	}
 
 	/**
 	* 	@header path.normalize(p)
@@ -261,57 +263,42 @@ component accessors=true {
 	}
 
 	public any function relative(from, to) {
-	    // if(isWindows) {
-	    // 	var theFrom = exports.resolve(arguments.from);
-		   //  var theTo = exports.resolve(arguments.to);
+	    if(isWindows) {
+	    	var theFrom = resolve(arguments.from);
+		    var theTo = resolve(arguments.to);
 
-		   //  // windows is not case sensitive
-		   //  var lowerFrom = LCase(theFrom);
-		   //  var lowerTo = LCase(theTo);
+		    // windows is not case sensitive
+		    var lowerFrom = LCase(theFrom);
+		    var lowerTo = LCase(theTo);
 
-		   //  function trim(arr) {
-		   //    var start = 0;
-		   //    for (; start < arr.length; start++) {
-		   //      if (arr[start] !== '') break;
-		   //    }
+		    var toParts = arrtrim(listToArray(theTo,'\'));
+		    //arrayDeleteAt(toParts,1);
+		    var lowerFromParts = arrtrim(listToArray(lowerFrom,'\'));
+		    var lowerToParts = arrtrim(listToArray(lowerTo,'\'));
 
-		   //    var end = arr.length - 1;
-		   //    for (; end >= 0; end--) {
-		   //      if (arr[end] !== '') break;
-		   //    }
-
-		   //    if (start > end) return [];
-		   //    return arr.slice(start, end - start + 1);
-		   //  }
-
-		   //  var toParts = trim(listToArray(theTo,'\'));
-
-		   //  var lowerFromParts = trim(listToArray(lowerFrom,'\'));
-		   //  var lowerToParts = trim(listToArray(lowerTo,'\'));
-
-		   //  var length = Math.min(arrayLen(lowerFromParts), arrayLen(lowerToParts));
-		   //  var samePartsLength = length;
+		    var length = min(arrayLen(lowerFromParts), arrayLen(lowerToParts));
+		    var samePartsLength = length;
 		    
-		   //  for (var i = 1; i < length; i++) {
-		   //    if (lowerFromParts[i] !== lowerToParts[i]) {
-		   //      samePartsLength = i;
-		   //      break;
-		   //    }
-		   //  }
+		    for (var i = 1; i < length; i++) {
+		      if (lowerFromParts[i] !== lowerToParts[i]) {
+		        samePartsLength = i;
+		        break;
+		      }
+		    }
 
-		   //  if (samePartsLength == 0) {
-		   //    return theTo;
-		   //  }
+		    if (samePartsLength == 0) {
+		      return theTo;
+		    }
 
-		   //  var outputParts = [];
-		   //  for (var i = samePartsLength; i < arrayLen(lowerFromParts); i++) {
-		   //    outputParts.add('..');
-		   //  }
+		    var outputParts = [];
+		    for (var i = samePartsLength; i < arrayLen(lowerFromParts); i++) {
+		      outputParts.add('..');
+		    }
 
-		   //  outputParts = _.concat(outputParts,arraySlice(toParts,samePartsLength));
+		    outputParts = _.concat(outputParts,arraySlice(toParts,samePartsLength));
 
-		   //  return arrayToList(outputParts,'\\');
-    	// } else {
+		    return arrayToList(outputParts,'\');
+    	} else {
     		var resolveFrom = resolve(arguments.from);
     		var resolveTo = resolve(arguments.to);
 
@@ -350,7 +337,7 @@ component accessors=true {
 		   var newParts = listToArray(arrayToList(jArrayUtils.subarray(toParts,samePartsLength,arrayLen(toParts))));
 		    outputParts.addAll(newParts);
 		    return ArrayToList(outputParts,'/');
-    	// }
+    	}
 	}
 
 	//HELPERS

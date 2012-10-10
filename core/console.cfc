@@ -8,7 +8,8 @@ component {
 		var jarPaths = [];
 		variables._ = new Util();
 		this.prefix = prefix;
-		jarPaths.add("/Users/rountrjf/Sites/foundry/deps/jansi-1.9.jar");
+		path = new path();
+		jarPaths.add(path.resolve(path.dirname(getCurrentTemplatePath()),'../deps/jansi-1.9.jar'));
 		variables.loader = createObject("component","foundry.deps.javaloader.JavaLoader").init(jarPaths);
     	//writeDump(var=ansi,abort=true);
 		variables.AnsiConsole = loader.create("org.fusesource.jansi.AnsiConsole");

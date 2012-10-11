@@ -1,0 +1,46 @@
+<project name="foundry" default="dist" basedir=".">
+    <description>
+      a platform for building modular coldfusion applications.
+    </description>
+  <!-- set global properties for this build -->
+  <property name="fpm" location="fpm"/>
+
+  <target name="init">
+    <!-- Create the time stamp -->
+    <tstamp/>
+    <!-- Create the build directory structure used by compile
+    <mkdir dir="${build}"/> -->
+    <exec executable="git">
+      <arg value="clone" />
+      <arg value="git://github.com/foundrycf/fpm.git" />
+    </exec>
+
+    <exec executable="ant" location="./fpm/">
+      <arg value="deps" />
+    </exec>
+  </target>
+
+  <target name="deps" description="gets dependencies">
+    <mkdir dir="${modules}"/>
+    
+    <exec executable="git">
+      <arg value="clone" />
+      <arg value="git://github.com/joshuairl/semver.git" />
+      <arg value="./foundry_modules/semver"/>
+    </exec>
+    <exec executable="git">
+      <arg value="clone" />
+      <arg value="git://github.com/slamkajs/mkdirp.git" />
+      <arg value="./foundry_modules/mkdirp"/>
+    </exec>
+    <exec executable="git">
+      <arg value="clone" />
+      <arg value="git://github.com/joshuairl/tmp.git" />
+      <arg value="./foundry_modules/tmp"/>
+    </exec>
+  </target>
+
+  <target name="clean" description="clean up">
+    <delete dir="${fpm}"/>
+  </target>
+</project>

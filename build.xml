@@ -5,6 +5,7 @@
   
   <!-- set global properties for this build -->
   <property name="fpm" location="fpm"/>
+  <property name="railo" location="railo"/>
   <property name="bin" location="bin"/>
   <property name="cliloader" location="bin/cliloader"/>
 
@@ -41,7 +42,7 @@
     <copy file="./railo/railo.sh" todir="${bin}"/>
     <copy file="./railo/shell.cfm" todir="${bin}"/>
     <copy file="./railo/start-server.bat" todir="${bin}"/>
-    
+
     <mkdir dir="${cliloader}" />
     <copy file="./railo/cliloader/LoaderCLIMain.class" todir="${cliloader}"/>
     <copy file="./railo/cliloader/LoaderCLIMain$ExtFilter.class" todir="${cliloader}"/>
@@ -50,5 +51,6 @@
   <target name="clean" description="clean up">
     <delete dir="${bin}"/>
     <delete dir="${fpm}"/>
+    <delete dir="${railo}"/>
   </target>
 </project>

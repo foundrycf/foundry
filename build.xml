@@ -39,6 +39,7 @@
   <target name="mergebin" description="merges to main bin folder">
     <mkdir dir="${bin}" />
     <copy file="./fpm/bin/fpm" todir="${bin}"/>
+    <copy file="./foundry/bin/foundry" todir="${bin}"/>
     <copy file="./railo/railo.sh" todir="${bin}"/>
     <copy file="./railo/shell.cfm" todir="${bin}"/>
     <copy file="./railo/start-server.bat" todir="${bin}"/>

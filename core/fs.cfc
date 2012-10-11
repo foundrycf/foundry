@@ -8,7 +8,8 @@ component name="fs" {
 	}
 
 	public any function exists(p,cb) {
-		if(fileExists(arguments.p)) {
+		// CHECK IF THE FILE OR DIRECTORY EXISTS
+		if(fileExists(arguments.p) || directoryExists(arguments.p)) {
 			exists = true;
 		} else {
 			exists = false;
@@ -63,14 +64,14 @@ component name="fs" {
 	}
 
 	public any function rmdir(path,callback) {
-		thread name="foundry-rmdir-#createUUID#" action="run" p=arguments.path cb=arguments.callback {
-			deleteDirectory(path);
+		thread name="foundry-rmdir-#createUUID()#" action="run" p=arguments.path cb=arguments.callback {
+			directoryDelete(path, true);
 			makeCallback(callback);
 		}
 	}
 
 	public any function rmdirSync(path,callback) {
-		deleteDirectory(path);
+		directoryDelete(path, true);
 	}
 
 	// Ensure that callbacks run in the global context. Only use this function

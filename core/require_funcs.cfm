@@ -185,4 +185,65 @@ _requireCore = function(moduleid) {
 };
 
 noop = function() {};
+
+getInheritedMetaData = function(required component,md = {},stopStr = "") {
+	var local = {};
+
+	//First time through, get metaData of component. 
+	if (structIsEmpty(md)) {
+		if (isObject(component)) {
+			md = getMetaData(component);
+		} else {
+			md = getComponentMetaData(component);
+		}
+	}
+
+	if(len(trim(stopStr)) GT 0 AND md.fullname CONTAINS stopStr) return md;
+	
+	//If it has a parent, stop and calculate it first, unless of course, we've reached a class we shouldn't recurse into.
+	if (structKeyExists(md,"extends")) {
+		local.parent = getInheritedMetaData(component,md.extends);
+	//If we're at the end of the line, it's time to start working backwards so start with an empty struct to hold our condensesd metadata.
+	} else {
+		local.parent = {};
+		local.parent.inheritancetrail = [];
+	}
+	
+	//Override ourselves into parent
+	for (local.key in structKeyArray(md)) {
+		//Functions and properties are an array of structs keyed on name, so I can treat them the same
+		if (listFind("FUNCTIONS,PROPERTIES",local.key)) {
+			if (not structKeyExists(local.parent,local.key)) {
+					local.parent[local.key] = [];
+			}
+			//For each function/property in me...
+			for (data in md) {
+				local.item = data;
+				local.parentItemCounter = 0;
+				local.foundInParent = false;
+
+				//...Look for an item of the same name in my parent...
+				for (local.parentItem in local.parent) {
+					local.parentItemCounter++;
+					//...And override it
+					if (compareNoCase(local.item.name,local.parentItem.name) eq 0) {
+						local.parentItem[local.parentItemCounter] = local.item;
+						local.foundInParent = true;
+						break;
+					}
+				}
+				//...Or add it
+				if (not local.foundInParent) {
+					arrayAppend(local.parent[local.key],local.item);
+				}
+			}
+		//For everything else (component-level annotations), just override them directly into the parent
+		} else if (NOT listFind("EXTENDS,IMPLEMENTS",local.key)) {
+			local.parent[local.key] = md[local.key];
+		}
+	}
+
+	arrayPrepend(local.parent.inheritanceTrail,local.parent.name);
+	return local.parent;
+}
 </cfscript>

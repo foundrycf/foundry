@@ -1,3 +1,0 @@
-[submodule "fpm"]
-	path = fpm
-	url = git://github.com/foundrycf/fpm

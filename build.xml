@@ -6,6 +6,7 @@
   <!-- set global properties for this build -->
   <property name="fpm" location="fpm"/>
   <property name="bin" location="bin"/>
+  <property name="cliloader" location="bin/cliloader"/>
 
   <target name="init">
     <!-- Create the time stamp -->
@@ -40,6 +41,10 @@
     <copy file="./railo/railo.sh" todir="${bin}"/>
     <copy file="./railo/shell.cfm" todir="${bin}"/>
     <copy file="./railo/start-server.bat" todir="${bin}"/>
+    
+    <mkdir dir="${cliloader}" />
+    <copy file="./railo/cliloader/LoaderCLIMain.class" todir="${cliloader}"/>
+    <copy file="./railo/cliloader/LoaderCLIMain$ExtFilter.class" todir="${cliloader}"/>
   </target>
 
   <target name="clean" description="clean up">

@@ -2,6 +2,6 @@ WEB-INF
 fpm
 railo
 .DS_Store
-
+bin
 *.sublime-project
 *.sublime-workspace

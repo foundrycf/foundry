@@ -1,4 +1,4 @@
 #!/bin/sh
 CURRPATH=$(pwd)
 cd $(dirname $0)
-./railo.sh "$@"
+exec ./railo.sh "$@"

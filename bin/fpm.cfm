@@ -1,4 +1,2 @@
-#!/usr/bin/env foundry
-<cfscript>
-	writeOutput("hi");
-</cfscript>
+#!/bin/bash
+exec "foundry" ../fpm/lib/cli.cfm?args=$@

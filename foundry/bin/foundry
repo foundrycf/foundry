@@ -1,4 +1,5 @@
 #!/bin/sh
 CURRPATH=$(pwd)
+echo $0
 cd $(dirname $0)
-./railo.sh "$@"
+exec "./railo.sh" ./shell.cfm "$@"

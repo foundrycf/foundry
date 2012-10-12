@@ -1,4 +1,2 @@
-#!/bin/sh
-CURRPATH=$(pwd)
-cd $(dirname $0)
-exec ./railo.sh "$@"
+#!/bin/bash
+exec "railo" $@

@@ -24,11 +24,6 @@
   <target name="deps" description="gets dependencies">
     <exec executable="git">
       <arg value="clone" />
-      <arg value="git://github.com/foundrycf/foundry-railo.git" />
-      <arg value="railo" />
-    </exec>
-    <exec executable="git">
-      <arg value="clone" />
       <arg value="git://github.com/foundrycf/fpm.git" />
     </exec>
     <exec executable="ant" dir="./fpm/">
@@ -40,18 +35,10 @@
     <mkdir dir="${bin}" />
     <copy file="./fpm/bin/fpm" todir="${bin}"/>
     <copy file="./foundry/bin/foundry" todir="${bin}"/>
-    <copy file="./railo/railo.sh" todir="${bin}"/>
-    <copy file="./railo/shell.cfm" todir="${bin}"/>
-    <copy file="./railo/start-server.bat" todir="${bin}"/>
-
-    <mkdir dir="${cliloader}" />
-    <copy file="./railo/cliloader/LoaderCLIMain.class" todir="${cliloader}"/>
-    <copy file="./railo/cliloader/LoaderCLIMain$ExtFilter.class" todir="${cliloader}"/>
   </target>
 
   <target name="clean" description="clean up">
     <delete dir="${bin}"/>
     <delete dir="${fpm}"/>
-    <delete dir="${railo}"/>
   </target>
 </project>

@@ -1,0 +1,12 @@
+#!/bin/bash
+
+#This converts spaces to %20's to avoid java quirk with these args dropping out
+cmd=
+for a in "$@"
+do
+	cmd=$cmd$a%20
+done
+CURRPATH=$(pwd)
+cd $(dirname $0)
+export FOUNDRY_HOME=$(dirname $(dirname $0))
+"foundry" -webroot=$FOUNDRY_HOME -uri="/fpm/lib/cli.cfm?args=$cmd&pwd=$CURRPATH"

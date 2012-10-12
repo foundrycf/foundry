@@ -1,5 +1,5 @@
 WEB-INF
-fpm
+fpm/
 railo
 .DS_Store
 *.sublime-project

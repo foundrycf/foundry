@@ -1,0 +1,37 @@
+<project name="foundry" default="init" basedir=".">
+  <description>
+    a platform for building modular coldfusion applications.
+  </description>
+  
+  <!-- set global properties for this build -->
+  <property name="fpm" location="fpm"/>
+
+  <target name="init">
+    <!-- Create the time stamp -->
+    <tstamp/>
+    <!-- Create the build directory structure used by compile
+    <mkdir dir="${build}"/> -->
+  </target>
+
+  <target name="full" depends="init">
+    <antcall target="deps" />
+  </target>
+
+  <target name="deps" description="gets dependencies">
+    <exec executable="git">
+      <arg value="clone" />
+      <arg value="git://github.com/foundrycf/fpm.git" />
+    </exec>
+    <exec executable="ant" dir="./fpm/">
+      <arg value="deps" />
+    </exec>
+  </target>
+
+  <target name="mergebin" description="merges to main bin folder">
+    
+  </target>
+
+  <target name="clean" description="clean up">
+    <delete dir="${fpm}"/>
+  </target>
+</project>

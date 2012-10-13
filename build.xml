@@ -5,9 +5,6 @@
   
   <!-- set global properties for this build -->
   <property name="fpm" location="fpm"/>
-  <property name="railo" location="railo"/>
-  <property name="bin" location="bin"/>
-  <property name="cliloader" location="bin/cliloader"/>
 
   <target name="init">
     <!-- Create the time stamp -->
@@ -18,7 +15,6 @@
 
   <target name="full" depends="init">
     <antcall target="deps" />
-    <antcall target="mergebin" />
   </target>
 
   <target name="deps" description="gets dependencies">
@@ -32,13 +28,10 @@
   </target>
 
   <target name="mergebin" description="merges to main bin folder">
-    <mkdir dir="${bin}" />
-    <copy file="./fpm/bin/fpm" todir="${bin}"/>
-    <copy file="./foundry/bin/foundry" todir="${bin}"/>
+    
   </target>
 
   <target name="clean" description="clean up">
-    <delete dir="${bin}"/>
     <delete dir="${fpm}"/>
   </target>
 </project>

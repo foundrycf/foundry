@@ -69,7 +69,7 @@ component {
 			var index = 1;
 			var resultIndex = 1;
 			for (element in arguments.obj) {
-				writeDump(var=element);
+				//writeDump(var=element);
 				if (!arrayIsDefined(arguments.obj, index)) {
 					index++;
 					continue;

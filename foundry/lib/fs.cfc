@@ -3,8 +3,22 @@ component name="fs" {
 		// variables._ = new Util();
 		// variables.path = new Path();
 		variables.futil = createObject("java","org.apache.commons.io.FileUtils");
+		variables.isWindows = (server.os.name CONTAINS "windows");
 
 		return this;
+	}
+
+	public amy function chmod(p, mode, cb) {
+		if(!isWindows) {
+			currFile = createObject("java","java.io.File").init(p);
+
+			currFile.setReadable(true);
+			currFile.setWritable(true);
+
+			return true;
+		}
+
+		return false;
 	}
 
 	public any function exists(p,cb) {

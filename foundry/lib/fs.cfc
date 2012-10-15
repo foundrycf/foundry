@@ -8,7 +8,7 @@ component name="fs" {
 		return this;
 	}
 
-	public amy function chmod(p, mode, cb) {
+	public any function chmod(p, mode, cb) {
 		if(!isWindows) {
 			currFile = createObject("java","java.io.File").init(p);
 
@@ -22,7 +22,7 @@ component name="fs" {
 	}
 
 	public any function exists(p,cb) {
-		if(fileExists(arguments.p)) {
+		if(fileExists(arguments.p) || directoryExists(arguments.p)) {
 			exists = true;
 		} else {
 			exists = false;
@@ -70,12 +70,12 @@ component name="fs" {
 	}
 
 	public any function rmdir(path,callback) {
-		directoryDelete(path);
+		directoryDelete(path, true);
 		makeCallback(callback);
 	}
 
 	public any function rmdirSync(path,callback) {
-		directoryDelete(path);
+		directoryDelete(path, true);
 	}
 
 	// Ensure that callbacks run in the global context. Only use this function

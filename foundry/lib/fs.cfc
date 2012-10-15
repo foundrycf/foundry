@@ -10,10 +10,8 @@ component name="fs" {
 
 	public any function chmod(p, mode, cb) {
 		if(!isWindows) {
-			currFile = createObject("java","java.io.File").init(p);
-
-			currFile.setReadable(true);
-			currFile.setWritable(true);
+			p.setReadable(true);
+			p.setWritable(true);
 
 			return true;
 		}

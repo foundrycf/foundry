@@ -70,14 +70,12 @@ component name="fs" {
 	}
 
 	public any function rmdir(path,callback) {
-		thread name="foundry-rmdir-#createUUID#" action="run" p=arguments.path cb=arguments.callback {
-			deleteDirectory(path);
-			makeCallback(callback);
-		}
+		directoryDelete(path);
+		makeCallback(callback);
 	}
 
 	public any function rmdirSync(path,callback) {
-		deleteDirectory(path);
+		directoryDelete(path);
 	}
 
 	// Ensure that callbacks run in the global context. Only use this function

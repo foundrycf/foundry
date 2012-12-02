@@ -37,7 +37,7 @@ Without installing Foundry, this doesn't offer much in terms of further implemen
 To learn how to install Foundry, follow the Installation guide in the section titled 'Installing Foundry' below.
 
 To utilize advanced functionality provided by Foundry, you can begin by making your base components extend "Foundry.Module".
-``` ColdFusion
+```cfs
 component name="MyAwesomeComponent" extends="Foundry.Module" {
 
 }
@@ -50,7 +50,7 @@ Many of it's principles are probably already used in your applications today so 
 1. [Download Foundry] (http://github.com/joshuairl/)
     or better yet, use Git
 
-    ```
+    ```shell
     $ cd ~/my_projects_folder/
     $ git clone https://github.com/foundrycf/foundry.git foundry
     ```
@@ -124,10 +124,10 @@ Many of it's principles are probably already used in your applications today so 
     ```
 
 5. Extend your base components to allow for easy usage of external dependencies.
-    ```
+    ```cfs
     component name="my_base" extends="foundry.module" {
         public my_base function init() {
-            variables.path = require("path"); //require the foundry path module, apart of foundry's core.
+            variables.path = require("path"); //require the foundry path module, a part of foundry's core.
             variables._ = require("UnderscoreCF"); //require underscore, an external module by @russplaysguitar
         }
 

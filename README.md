@@ -52,7 +52,7 @@ Many of it's principles are probably already used in your applications today so 
 
     ```
     $ cd ~/my_projects_folder/
-    $ git clone https://github.com/joshuairl/foundry.git foundry
+    $ git clone https://github.com/foundrycf/foundry.git foundry
     ```
 2. Create a mapping (and/or symlink/virtualweb in your project) to `/foundry`.
 
@@ -114,7 +114,7 @@ Many of it's principles are probably already used in your applications today so 
         "UnderscoreCF"   :  "*"
       }, //A structure containing key/pair mappings of foundry packages and versions that this project depends on.
     
-      "license": "MIT", The license which you prefer to release your project under. MIT is a good choice.
+      "license": "MIT", //The license which you prefer to release your project under. MIT is a good choice.
       "engines": {
         "adobe": ">=9.0.0" //specifies adobe version required
         "railo": ">=3.3.1" //specifies railo version requird

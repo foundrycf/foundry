@@ -138,6 +138,6 @@ Many of it's principles are probably already used in your applications today so 
     }
     ```
 
-6. To download and install dependencies use [fpm](https://github.com/joshuairl/fpm) (proof-of-concept)
+6. To download and install dependencies use [fpm](https://github.com/foundrycf/fpm) (proof-of-concept)
     
 ## Usage Examples

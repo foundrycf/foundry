@@ -34,7 +34,7 @@ component name="emitter" extends="foundry.lib.module" {
 
 	public any function emit() {
 		var type = arguments[1];
-	//	If there is no 'error' event listener then throw.
+		//	If there is no 'error' event listener then throw.
 		if (type EQ 'error') {
 			if (!structKeyExists(this,'_events') || !structKeyExists(this._events,'error') || (_.isArray(this._events.error) && !arrayLen(this._events.error)))
 			{

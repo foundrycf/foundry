@@ -245,5 +245,5 @@ getInheritedMetaData = function(required component,md = {},stopStr = "") {
 
 	arrayPrepend(local.parent.inheritanceTrail,local.parent.name);
 	return local.parent;
-}
+};
 </cfscript>
